@@ -1,23 +1,10 @@
 "use client";
 
-import {
-  Home,
-  Calendar,
-  Settings,
-  Plus,
-  Shirt,
-  User,
-  ShoppingBasket,
-  LogOut,
-  Users,
-  User2,
-} from "lucide-react";
+import { Home, Calendar, Settings, LogOut, Users, User2 } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
-  SidebarGroupAction,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
@@ -25,11 +12,6 @@ import {
   SidebarMenuItem,
 } from "./ui/sidebar";
 import Link from "next/link";
-import { Sheet, SheetTrigger } from "./ui/sheet";
-import AddOrder from "./AddOrder";
-import AddUser from "./AddUser";
-import AddCategory from "./AddCategory";
-import AddProduct from "./AddProduct";
 import { useAuth } from "@/context/Auth";
 import { logout } from "@/server/actions";
 

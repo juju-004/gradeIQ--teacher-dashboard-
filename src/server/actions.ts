@@ -8,11 +8,6 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 
-type RegisterState = {
-  error: string | null;
-  success: boolean;
-};
-
 // ADD THE GETSESSION ACTION
 export async function getSession() {
   const session = await getIronSession<SessionData>(
