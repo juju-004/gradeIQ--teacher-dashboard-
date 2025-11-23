@@ -12,12 +12,7 @@ import {
 interface User {
   id: string;
   name?: string;
-  role: "teacher" | "school";
-
-  // school
   email?: string;
-
-  // teacher
   school?: string;
   subject?: string;
 }

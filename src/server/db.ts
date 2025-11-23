@@ -18,33 +18,16 @@ const schoolSchema = new Schema(
   { timestamps: true }
 );
 
-schoolSchema.set("toJSON", {
-  virtuals: true,
-  versionKey: false,
-  transform: (_doc, ret) => {
-    delete ret._id;
-    delete ret.password;
-  },
-});
-
 const teacherSchema = new Schema(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
+    subject: { type: String, required: true, unique: true },
     password: { type: String, required: true }, // store hash
-    school: { type: Schema.Types.ObjectId, ref: "School", required: true },
+    school: { type: String, required: true },
   },
   { timestamps: true }
 );
-
-teacherSchema.set("toJSON", {
-  virtuals: true,
-  versionKey: false,
-  transform: (_doc, ret) => {
-    delete ret._id;
-    delete ret.password;
-  },
-});
 
 export const db = {
   connectDB,

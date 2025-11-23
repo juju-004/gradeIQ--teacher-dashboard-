@@ -2,14 +2,15 @@ import { SessionOptions } from "iron-session";
 
 export interface SessionData {
   id?: string;
-  role: "teacher" | "school";
   name?: string;
+  subject?: string;
+  email?: string;
+  school?: string;
   isLoggedIn: boolean;
 }
 
 export const defaultSession: SessionData = {
   isLoggedIn: false,
-  role: "teacher",
 };
 
 export const sessionOptions: SessionOptions = {

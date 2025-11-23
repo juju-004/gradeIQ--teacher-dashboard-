@@ -1,15 +1,16 @@
+"use client";
+
 import {
   Home,
-  Inbox,
   Calendar,
-  Search,
   Settings,
-  User2,
-  ChevronUp,
   Plus,
   Shirt,
   User,
   ShoppingBasket,
+  LogOut,
+  Users,
+  User2,
 } from "lucide-react";
 import {
   Sidebar,
@@ -19,26 +20,18 @@ import {
   SidebarGroupAction,
   SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarHeader,
   SidebarMenu,
-  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarSeparator,
 } from "./ui/sidebar";
 import Link from "next/link";
-import Image from "next/image";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
 import { Sheet, SheetTrigger } from "./ui/sheet";
 import AddOrder from "./AddOrder";
 import AddUser from "./AddUser";
 import AddCategory from "./AddCategory";
 import AddProduct from "./AddProduct";
+import { useAuth } from "@/context/Auth";
+import { logout } from "@/server/actions";
 
 const items = [
   {
@@ -47,19 +40,14 @@ const items = [
     icon: Home,
   },
   {
-    title: "Inbox",
+    title: "Students",
     url: "#",
-    icon: Inbox,
+    icon: Users,
   },
   {
     title: "Calendar",
     url: "#",
     icon: Calendar,
-  },
-  {
-    title: "Search",
-    url: "#",
-    icon: Search,
   },
   {
     title: "Settings",
@@ -69,28 +57,28 @@ const items = [
 ];
 
 const AppSidebar = () => {
+  const { currentUser } = useAuth();
   return (
     <Sidebar collapsible="icon" className="!rounded-r-[10%]">
       <SidebarContent>
         <SidebarGroup className="mt-5">
           <SidebarMenu>
             <SidebarMenuItem>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <SidebarMenuButton>
-                    <User2 /> John Doe <ChevronUp className="ml-auto" />
-                  </SidebarMenuButton>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem>Account</DropdownMenuItem>
-                  <DropdownMenuItem>Setting</DropdownMenuItem>
-                  <DropdownMenuItem>Sign out</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <SidebarMenuButton asChild className="h-auto py-2">
+                <Link href="/products" className="fx">
+                  <User2 />
+                  <span className="flex flex-col">
+                    <span>{currentUser?.name}</span>
+                    <span className="opacity-60 font-light text-xs">
+                      {currentUser?.school}
+                    </span>
+                  </span>
+                </Link>
+              </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
-        <SidebarGroup>
+        <SidebarGroup className="bg-black/30 flex-1 rounded-t-3xl">
           <SidebarGroupLabel>Application</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -102,15 +90,26 @@ const AppSidebar = () => {
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
-                  {item.title === "Inbox" && (
-                    <SidebarMenuBadge>24</SidebarMenuBadge>
-                  )}
                 </SidebarMenuItem>
               ))}
+              <form action={logout}>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    className="active:opacity-55 duration-150"
+                    asChild
+                  >
+                    <button>
+                      <LogOut className="text-destructive" />
+                      <span>Log Out</span>
+                    </button>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </form>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        {/* <SidebarGroup>
+        {/* 
+        <SidebarGroup>
           <SidebarGroupLabel>Products</SidebarGroupLabel>
           <SidebarGroupAction>
             <Plus /> <span className="sr-only">Add Product</span>
@@ -157,8 +156,8 @@ const AppSidebar = () => {
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
-        </SidebarGroup>
-        <SidebarGroup>
+        </SidebarGroup> */}
+        {/* <SidebarGroup>
           <SidebarGroupLabel>Users</SidebarGroupLabel>
           <SidebarGroupAction>
             <Plus /> <span className="sr-only">Add User</span>
@@ -225,7 +224,6 @@ const AppSidebar = () => {
           </SidebarGroupContent>
         </SidebarGroup> */}
       </SidebarContent>
-      <SidebarFooter></SidebarFooter>
     </Sidebar>
   );
 };
