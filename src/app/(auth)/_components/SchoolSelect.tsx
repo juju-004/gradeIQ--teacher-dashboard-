@@ -33,8 +33,8 @@ export default function SchoolSelect({
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await axios.get("/api/schools");
-        const names = res.data.map((s: any) => s.name);
+        const { data } = await axios.get("/api/schools");
+        const names = data.map((s: { name: string }) => s.name);
         setSchools(names);
       } finally {
         setLoading(false);

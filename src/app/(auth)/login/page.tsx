@@ -21,7 +21,6 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { login } from "@/server/actions";
 import { Separator } from "@/components/ui/separator";
-import { useRouter } from "next/navigation";
 
 const LoginSchema = z.object({
   email: z.string().email("Please enter a valid email"),
