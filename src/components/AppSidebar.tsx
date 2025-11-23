@@ -78,7 +78,7 @@ const AppSidebar = () => {
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
-        <SidebarGroup className="bg-black/30 flex-1 rounded-t-3xl">
+        <SidebarGroup className="dark:bg-black/30 bg-black/5 flex-1 rounded-t-3xl">
           <SidebarGroupLabel>Application</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
