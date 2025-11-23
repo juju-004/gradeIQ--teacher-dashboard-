@@ -1,7 +1,7 @@
 import { Payment, columns } from "./columns";
 import { DataTable } from "./data-table";
 
-export const getData = async (): Promise<Payment[]> => {
+const getData = async (): Promise<Payment[]> => {
   return [
     {
       id: "728ed521",
