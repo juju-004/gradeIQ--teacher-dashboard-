@@ -31,7 +31,7 @@ export async function logout() {
 }
 
 // ADD THE LOGIN ACTION
-export async function login(prevState: any, formData: FormData) {
+export async function login(prevState: unknown, formData: FormData) {
   const session = await getSession();
 
   const email = formData.get("email") as string;
@@ -56,7 +56,7 @@ export async function login(prevState: any, formData: FormData) {
   redirect("/");
 }
 
-export async function register(prevState: any, formData: FormData) {
+export async function register(prevState: unknown, formData: FormData) {
   const session = await getSession();
 
   const name = formData.get("name") as string;

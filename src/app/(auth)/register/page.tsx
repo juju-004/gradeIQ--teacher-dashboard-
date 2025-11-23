@@ -47,8 +47,8 @@ export default function RegisterPage() {
   });
 
   useEffect(() => {
-    state?.error && toast.success(state?.error);
-  }, [state?.error]);
+    if (state?.error) toast.success(state?.error);
+  }, [state]);
 
   return (
     <>

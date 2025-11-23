@@ -51,7 +51,7 @@ export default function LoginPage() {
     if (state.error) {
       toast.error(state.error);
     }
-  }, [state, toast]);
+  }, [state]);
   return (
     <>
       <div className="text-center mb-8">
