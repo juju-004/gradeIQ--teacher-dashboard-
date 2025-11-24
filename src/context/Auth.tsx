@@ -9,31 +9,35 @@ import {
   SetStateAction,
 } from "react";
 
-interface User {
+// Full session-based user type
+export interface User {
   id: string;
-  name?: string;
-  email?: string;
-  school?: string;
-  subject?: string;
+  name: string;
+  email: string;
+  roles: Array<"admin" | "teacher" | "formTeacher">;
+  assignedSubjects?: string[];
+  formClass?: string | null;
+  school?: string; // optional, if you store school name or id
 }
 
 interface AuthContextType {
-  currentUser: User | null;
-  setCurrentUser: Dispatch<SetStateAction<User | null>>;
+  user: User | null;
+  setUser: Dispatch<SetStateAction<User | null>>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({
   children,
-  user,
+  initialUser = null,
 }: {
   children: ReactNode;
-  user: User;
+  initialUser?: User | null;
 }) {
-  const [currentUser, setCurrentUser] = useState<User | null>(user);
+  const [user, setUser] = useState<User | null>(initialUser);
+
   return (
-    <AuthContext.Provider value={{ currentUser, setCurrentUser }}>
+    <AuthContext.Provider value={{ user, setUser }}>
       {children}
     </AuthContext.Provider>
   );

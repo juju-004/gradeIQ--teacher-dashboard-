@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,95 +19,92 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { register } from "@/server/actions";
-import SchoolSelect from "@/app/(auth)/_components/SchoolSelect";
 import { Separator } from "@/components/ui/separator";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import { filterError } from "@/server/lib";
 
 const RegisterSchema = z.object({
   name: z.string().min(2, "Full name is too short"),
+  code: z.string().min(2, "Code is too short"),
   email: z.string().email("Please enter a valid email"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  subject: z.string().min(2, "Enter a valid subject"),
-  school: z.string().min(1, "Please select a school"),
+  school: z.string().min(3, "School name is too short"),
 });
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const [state, formAction, isPending] = useActionState(register, undefined);
+  const [_, formAction, isPending] = useActionState(
+    async (previousState: unknown, formData: FormData) => {
+      try {
+        const name = formData.get("name");
+        const code = formData.get("code");
+        const school = formData.get("school");
+        const email = formData.get("email");
+        const password = formData.get("password");
+
+        await axios.post("/api/create-admin", {
+          name,
+          code,
+          school,
+          email,
+          password,
+        });
+        toast.success("Sign up successful");
+        router.push("/welcome");
+      } catch (error: unknown) {
+        toast.error(filterError(error));
+        return null;
+      }
+    },
+    undefined
+  );
 
   const form = useForm({
     resolver: zodResolver(RegisterSchema),
     defaultValues: {
       name: "",
+      code: "",
       email: "",
       password: "",
-      subject: "",
       school: "",
     },
   });
 
-  useEffect(() => {
-    if (state?.error) toast.success(state?.error);
-  }, [state]);
-
   return (
     <>
       <div className="text-center mb-8">
-        <h1 className="text-2xl font-semibold mt-4">Create Your Account</h1>
-        <p className="text-neutral-500 mt-1">Join Grade IQ in a few clicks</p>
+        <h1 className="text-2xl font-semibold mt-4">Create School (Admin)</h1>
+        <p className="text-neutral-500 mt-1">
+          Create your profile to access your school dashboard
+        </p>
       </div>
 
       <Separator className="mb-4" />
       <Form {...form}>
         <form action={formAction} className="space-y-5">
+          {/* Name */}
           <FormField
-            name="school"
             control={form.control}
+            name="name"
             render={({ field }) => (
-              <>
-                <SchoolSelect value={field.value} onChange={field.onChange} />
-                <input type="hidden" name="school" value={field.value ?? ""} />
-              </>
+              <FormItem>
+                <FormLabel>Admin Full Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="John Doe" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
           />
-
-          {/* Name */}
-          <div className="flex flex-col sm:flex-row gap-5 sm:gap-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Full Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="John Doe" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="subject"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Subject</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., Mathematics" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
           {/* Email */}
           <FormField
             control={form.control}
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email Address</FormLabel>
+                <FormLabel>Admin Email Address</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="you@example.com"
@@ -119,8 +116,19 @@ export default function RegisterPage() {
               </FormItem>
             )}
           />
-
-          {/* Password */}
+          <FormField
+            control={form.control}
+            name="school"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>School Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Mainland Institution" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             control={form.control}
             name="password"
@@ -147,7 +155,19 @@ export default function RegisterPage() {
               </FormItem>
             )}
           />
-
+          <FormField
+            control={form.control}
+            name="code"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Activation Code</FormLabel>
+                <FormControl>
+                  <Input placeholder="ABCDEFGHIJ" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <Button
             type="submit"
             disabled={isPending}

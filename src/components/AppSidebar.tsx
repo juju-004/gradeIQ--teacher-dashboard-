@@ -1,6 +1,14 @@
 "use client";
 
-import { Home, Calendar, Settings, LogOut, Users, User2 } from "lucide-react";
+import {
+  Home,
+  Users,
+  Settings,
+  FileText,
+  Edit,
+  User2,
+  LogOut,
+} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -14,45 +22,68 @@ import {
 import Link from "next/link";
 import { useAuth } from "@/context/Auth";
 import { logout } from "@/server/actions";
+import { useState } from "react";
 
-const items = [
-  {
-    title: "Home",
-    url: "/",
-    icon: Home,
-  },
-  {
-    title: "Students",
-    url: "#",
-    icon: Users,
-  },
-  {
-    title: "Calendar",
-    url: "#",
-    icon: Calendar,
-  },
-  {
-    title: "Settings",
-    url: "#",
-    icon: Settings,
-  },
-];
+// Role-based tabs
+const roleTabs: Record<
+  string,
+  Array<{ title: string; url: string; icon: any }>
+> = {
+  admin: [
+    { title: "Dashboard", url: "/", icon: Home },
+    { title: "Manage Staff", url: "/teachers", icon: Users },
+    { title: "Manage Classes", url: "/teachers", icon: Users },
+    { title: "School Settings", url: "/settings", icon: Settings },
+  ],
+  formTeacher: [
+    { title: "Dashboard", url: "/", icon: Home },
+    { title: "Class Results", url: "/class-results", icon: FileText },
+    { title: "Manage Class List", url: "/class-list", icon: Users },
+  ],
+  teacher: [
+    { title: "Dashboard", url: "/", icon: Home },
+    { title: "My Students", url: "/my-students", icon: Users },
+    { title: "Enter Marks", url: "/enter-marks", icon: Edit },
+  ],
+};
 
 const AppSidebar = () => {
-  const { currentUser } = useAuth();
+  const { user } = useAuth();
+  const [text, setText] = useState("Log Out");
+
+  // Aggregate tabs based on roles
+  const menuItems: Array<{ title: string; url: string; icon: any }> = [];
+  if (user?.roles) {
+    user.roles.forEach((role) => {
+      if (roleTabs[role]) {
+        roleTabs[role].forEach((tab) => {
+          // avoid duplicates
+          if (!menuItems.find((i) => i.url === tab.url)) menuItems.push(tab);
+        });
+      }
+    });
+  }
+
   return (
-    <Sidebar collapsible="icon" className="!rounded-r-[10%]">
+    <Sidebar
+      collapsible="icon"
+      className="!rounded-r-[10%] w-48 sm:w-44 md:w-52 shadow-lg border-r border-neutral-200 dark:border-neutral-800"
+    >
       <SidebarContent>
+        {/* User Info */}
         <SidebarGroup className="mt-5">
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild className="h-auto py-2">
-                <Link href="/products" className="fx">
-                  <User2 />
+              <SidebarMenuButton asChild className="h-auto py-1 px-2">
+                <Link
+                  href="/profile"
+                  className="flex items-center gap-3 font-semibold text-base"
+                >
+                  <User2 size={22} className="text-c1" />
                   <span className="flex flex-col">
-                    <span>{currentUser?.name}</span>
-                    <span className="opacity-60 font-light text-xs">
-                      {currentUser?.school}
+                    <span className="font-bold">{user?.name}</span>
+                    <span className="opacity-70 font-light text-xs">
+                      {user?.roles}
                     </span>
                   </span>
                 </Link>
@@ -60,29 +91,39 @@ const AppSidebar = () => {
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
+
+        {/* Application Menu */}
         <SidebarGroup className="dark:bg-black/30 bg-black/5 flex-1 rounded-t-3xl">
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
+          <SidebarGroupLabel className="font-bold text-sm px-2">
+            Application
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
+              {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <Link href={item.url}>
-                      <item.icon />
+                  <SidebarMenuButton asChild className="px-2 py-1">
+                    <Link
+                      className="flex items-center gap-3 font-semibold text-sm"
+                      href={item.url}
+                    >
+                      <item.icon size={20} />
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
-              <form action={logout}>
+
+              {/* Logout */}
+              <form onSubmit={() => setText("Logging Out...")} action={logout}>
                 <SidebarMenuItem>
                   <SidebarMenuButton
-                    className="active:opacity-55 duration-150"
+                    className="active:opacity-70 duration-150 px-2 py-1"
                     asChild
+                    disabled={text === "Logging Out..."}
                   >
-                    <button>
-                      <LogOut className="text-destructive" />
-                      <span>Log Out</span>
+                    <button className="flex items-center gap-3 font-semibold text-sm text-destructive">
+                      <LogOut size={20} />
+                      <span>{text}</span>
                     </button>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -90,121 +131,6 @@ const AppSidebar = () => {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        {/* 
-        <SidebarGroup>
-          <SidebarGroupLabel>Products</SidebarGroupLabel>
-          <SidebarGroupAction>
-            <Plus /> <span className="sr-only">Add Product</span>
-          </SidebarGroupAction>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href="/products">
-                    <Shirt />
-                    See All Products
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Sheet>
-                    <SheetTrigger asChild>
-                      <SidebarMenuButton asChild>
-                        <Link href="#">
-                          <Plus />
-                          Add Product
-                        </Link>
-                      </SidebarMenuButton>
-                    </SheetTrigger>
-                    <AddProduct />
-                  </Sheet>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Sheet>
-                    <SheetTrigger asChild>
-                      <SidebarMenuButton asChild>
-                        <Link href="#">
-                          <Plus />
-                          Add Category
-                        </Link>
-                      </SidebarMenuButton>
-                    </SheetTrigger>
-                    <AddCategory />
-                  </Sheet>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup> */}
-        {/* <SidebarGroup>
-          <SidebarGroupLabel>Users</SidebarGroupLabel>
-          <SidebarGroupAction>
-            <Plus /> <span className="sr-only">Add User</span>
-          </SidebarGroupAction>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href="/users">
-                    <User />
-                    See All Users
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Sheet>
-                    <SheetTrigger asChild>
-                      <SidebarMenuButton asChild>
-                        <Link href="#">
-                          <Plus />
-                          Add User
-                        </Link>
-                      </SidebarMenuButton>
-                    </SheetTrigger>
-                    <AddUser />
-                  </Sheet>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-        <SidebarGroup>
-          <SidebarGroupLabel>Orders / Payments</SidebarGroupLabel>
-          <SidebarGroupAction>
-            <Plus /> <span className="sr-only">Add Order</span>
-          </SidebarGroupAction>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href="/users">
-                    <ShoppingBasket />
-                    See All Transactions
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Sheet>
-                    <SheetTrigger asChild>
-                      <SidebarMenuButton asChild>
-                        <Link href="#">
-                          <Plus />
-                          Add Order
-                        </Link>
-                      </SidebarMenuButton>
-                    </SheetTrigger>
-                    <AddOrder />
-                  </Sheet>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup> */}
       </SidebarContent>
     </Sidebar>
   );

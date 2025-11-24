@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,25 +19,38 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { login } from "@/server/actions";
 import { Separator } from "@/components/ui/separator";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import { filterError } from "@/server/lib";
 
 const LoginSchema = z.object({
   email: z.string().email("Please enter a valid email"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-export type RegisterState = {
-  error: string | null;
-  success: boolean;
-};
-
 export default function LoginPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const [state, formAction, isPending] = useActionState<
-    { error: string | null },
-    FormData
-  >(login, { error: null });
+  const [_, formAction, isPending] = useActionState(
+    async (p: unknown, formData: FormData) => {
+      try {
+        const email = formData.get("email");
+        const password = formData.get("password");
+
+        await axios.post("/api/login", {
+          email,
+          password,
+        });
+        toast.success("Login successful");
+        router.push("/");
+      } catch (error: unknown) {
+        toast.error(filterError(error));
+        return null;
+      }
+    },
+    null
+  );
 
   const form = useForm({
     resolver: zodResolver(LoginSchema),
@@ -47,11 +60,6 @@ export default function LoginPage() {
     },
   });
 
-  useEffect(() => {
-    if (state.error) {
-      toast.error(state.error);
-    }
-  }, [state]);
   return (
     <>
       <div className="text-center mb-8">
@@ -64,7 +72,6 @@ export default function LoginPage() {
       <Separator className="mb-4" />
       <Form {...form}>
         <form action={formAction} className="space-y-5">
-          {/* Email */}
           <FormField
             control={form.control}
             name="email"
@@ -83,7 +90,6 @@ export default function LoginPage() {
             )}
           />
 
-          {/* Password */}
           <FormField
             control={form.control}
             name="password"

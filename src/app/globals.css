@@ -136,4 +136,7 @@
   .fx {
     @apply flex justify-center items-center;
   }
+  input {
+    @apply border-solid border-2;
+  }
 }

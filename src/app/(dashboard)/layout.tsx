@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import AppSidebar from "@/components/AppSidebar";
+import AppSidebar from "@/components/AppSideBar";
 import Navbar from "@/components/Navbar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { cookies } from "next/headers";
@@ -19,18 +19,18 @@ export default async function RootLayout({
   const session = await getSession();
 
   if (!session.id) {
-    console.log(session);
-
     redirect("/login");
   }
 
-  const { id, school, name, email, subject } = session;
+  const { id, roles, name, email, assignedSubjects, formClass } = session;
 
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
 
   return (
-    <AuthProvider user={{ id, school, name, email, subject }}>
+    <AuthProvider
+      initialUser={{ id, roles, name, email, assignedSubjects, formClass }}
+    >
       <SidebarProvider defaultOpen={defaultOpen}>
         <AppSidebar />
         <main className="w-full">
