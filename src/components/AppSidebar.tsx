@@ -8,6 +8,7 @@ import {
   Edit,
   User2,
   LogOut,
+  LucideProps,
 } from "lucide-react";
 import {
   Sidebar,
@@ -22,12 +23,18 @@ import {
 import Link from "next/link";
 import { useAuth } from "@/context/Auth";
 import { logout } from "@/server/actions";
-import { useState } from "react";
+import { ForwardRefExoticComponent, RefAttributes, useState } from "react";
 
 // Role-based tabs
 const roleTabs: Record<
   string,
-  Array<{ title: string; url: string; icon: unknown }>
+  Array<{
+    title: string;
+    url: string;
+    icon: ForwardRefExoticComponent<
+      Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>
+    >;
+  }>
 > = {
   admin: [
     { title: "Dashboard", url: "/", icon: Home },
@@ -52,7 +59,13 @@ const AppSidebar = () => {
   const [text, setText] = useState("Log Out");
 
   // Aggregate tabs based on roles
-  const menuItems: Array<{ title: string; url: string; icon: any }> = [];
+  const menuItems: Array<{
+    title: string;
+    url: string;
+    icon: ForwardRefExoticComponent<
+      Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>
+    >;
+  }> = [];
   if (user?.roles) {
     user.roles.forEach((role) => {
       if (roleTabs[role]) {

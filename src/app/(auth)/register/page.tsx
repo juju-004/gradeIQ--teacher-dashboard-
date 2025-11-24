@@ -35,7 +35,7 @@ const RegisterSchema = z.object({
 export default function RegisterPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const [_, formAction, isPending] = useActionState(
+  const [state, formAction, isPending] = useActionState(
     async (previousState: unknown, formData: FormData) => {
       try {
         const name = formData.get("name");
@@ -74,6 +74,7 @@ export default function RegisterPage() {
 
   return (
     <>
+      <span className="hidden">{state}</span>
       <div className="text-center mb-8">
         <h1 className="text-2xl font-semibold mt-4">Create School (Admin)</h1>
         <p className="text-neutral-500 mt-1">
