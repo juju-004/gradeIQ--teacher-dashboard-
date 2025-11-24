@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import AppSidebar from "@/components/AppSideBar";
+// import AppSidebar from "@/components/AppSideBar";
 import Navbar from "@/components/Navbar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { cookies } from "next/headers";
@@ -32,7 +32,7 @@ export default async function RootLayout({
       initialUser={{ id, roles, name, email, assignedSubjects, formClass }}
     >
       <SidebarProvider defaultOpen={defaultOpen}>
-        <AppSidebar />
+        {/* <AppSidebar /> */}
         <main className="w-full">
           <Navbar />
           <div className="px-4">{children}</div>
