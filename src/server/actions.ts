@@ -5,7 +5,6 @@ import { sessionOptions } from "@/server/lib";
 import { getIronSession } from "iron-session";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import bcrypt from "bcryptjs";
 
 // ADD THE GETSESSION ACTION
 export async function getSession() {

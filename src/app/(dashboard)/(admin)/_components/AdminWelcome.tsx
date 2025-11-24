@@ -136,7 +136,7 @@ export default function WelcomeAdminPage() {
       <div className="mb-6 text-center">
         <h1 className="text-3xl font-bold">Welcome to Grade IQ!</h1>
         <p className="text-neutral-500 mt-2">
-          Let's set up your school before you start navigating.
+          Let&apos;s set up your school before you start navigating.
         </p>
       </div>
 
@@ -227,8 +227,12 @@ export default function WelcomeAdminPage() {
                     className="flex items-center gap-2 cursor-pointer"
                   >
                     <Checkbox
-                      checked={staffInput.roles.includes(role as any)}
-                      onCheckedChange={() => toggleRole(role as any)}
+                      checked={staffInput.roles.includes(
+                        role as "teacher" | "formTeacher"
+                      )}
+                      onCheckedChange={() =>
+                        toggleRole(role as "teacher" | "formTeacher")
+                      }
                       className="w-4 h-4 accent-c1"
                     />
                     {role === "teacher" ? "Teacher" : "Form Teacher"}

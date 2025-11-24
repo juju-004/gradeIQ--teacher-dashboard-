@@ -27,7 +27,7 @@ import { useState } from "react";
 // Role-based tabs
 const roleTabs: Record<
   string,
-  Array<{ title: string; url: string; icon: any }>
+  Array<{ title: string; url: string; icon: unknown }>
 > = {
   admin: [
     { title: "Dashboard", url: "/", icon: Home },
