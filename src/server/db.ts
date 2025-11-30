@@ -12,7 +12,8 @@ export interface IUser extends Document {
   roles: Role[];
   assignedSubjects?: string[]; // subject names or ids
   formClass?: string | null; // e.g., 'SS2B'
-  school: string;
+  school?: string;
+  schoolId: string;
   createdAt: Date;
 }
 
@@ -33,7 +34,8 @@ const UserSchema = new Schema<IUser>(
     roles: { type: [String], required: true, default: ["teacher"] },
     assignedSubjects: { type: [String], default: [] },
     formClass: { type: String, default: null },
-    school: { type: String, required: true, ref: "School" },
+    school: { type: String },
+    schoolId: { type: String, required: true },
   },
   { timestamps: true }
 );

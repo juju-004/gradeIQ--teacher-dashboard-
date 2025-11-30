@@ -3,14 +3,17 @@ import bcrypt from "bcryptjs";
 import { Activation, connectDB, User } from "@/server/db";
 import { getSession } from "@/server/actions";
 
+export function generateSchoolId() {
+  const rand = Math.random().toString(36).substring(2, 10).toUpperCase();
+  return `SCH-${rand}`;
+}
+
 export async function POST(req: NextRequest) {
   await connectDB();
   const body = await req.json();
   const { school, code, name, email, password } = body;
 
   if (!school || !code || !name || !email || !password) {
-    console.log(school, code, name, email, password);
-
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
   }
 
@@ -32,7 +35,7 @@ export async function POST(req: NextRequest) {
   // Create admin user
   const salt = await bcrypt.genSalt(10);
   const hash = await bcrypt.hash(password, salt);
-
+  const schoolId = generateSchoolId();
   const admin = new User({
     name,
     email,
@@ -41,6 +44,7 @@ export async function POST(req: NextRequest) {
     assignedSubjects: [],
     formClass: null,
     school,
+    schoolId,
   });
   await admin.save();
 
@@ -51,6 +55,7 @@ export async function POST(req: NextRequest) {
   // Set session
   const session = await getSession();
   session.id = String(admin._id);
+  session.schoolId = admin.schoolId;
   session.name = admin.name;
   session.email = admin.email;
   session.roles = admin.roles;

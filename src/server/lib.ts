@@ -8,6 +8,7 @@ export interface SessionData {
   roles: Array<"admin" | "teacher" | "formTeacher">;
   assignedSubjects?: string[];
   formClass?: string | null;
+  schoolId: string;
 }
 
 export const sessionOptions: SessionOptions = {
