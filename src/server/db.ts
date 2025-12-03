@@ -8,13 +8,18 @@ export type Role = "admin" | "teacher" | "formTeacher";
 export interface IUser extends Document {
   name: string;
   email: string;
-  passwordHash: string;
+  passwordHash?: string;
   roles: Role[];
   assignedSubjects?: string[]; // subject names or ids
   formClass?: string | null; // e.g., 'SS2B'
   school?: string;
   schoolId: string;
   createdAt: Date;
+  password?: {
+    encrypted: string;
+    iv: string;
+    tag: string;
+  };
 }
 
 export interface IActivation extends Document {
@@ -30,12 +35,17 @@ const UserSchema = new Schema<IUser>(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    passwordHash: { type: String, required: true },
+    passwordHash: { type: String, required: false },
     roles: { type: [String], required: true, default: ["teacher"] },
     assignedSubjects: { type: [String], default: [] },
     formClass: { type: String, default: null },
     school: { type: String },
     schoolId: { type: String, required: true },
+    password: {
+      encrypted: { type: String, required: false },
+      iv: { type: String, required: false },
+      tag: { type: String, required: false },
+    },
   },
   { timestamps: true }
 );

@@ -9,6 +9,7 @@ export interface SessionData {
   assignedSubjects?: string[];
   formClass?: string | null;
   schoolId: string;
+  schoolName?: string;
 }
 
 export const sessionOptions: SessionOptions = {

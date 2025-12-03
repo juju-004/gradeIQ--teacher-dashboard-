@@ -1,4 +1,5 @@
 // app/api/dashboard/route.ts
+import { getSession } from "@/server/actions";
 import { connectDB, User } from "@/server/db";
 import ClassList from "@/server/models/ClassList";
 import StudentList from "@/server/models/StudentList";
@@ -8,8 +9,11 @@ export async function GET() {
   try {
     await connectDB();
 
-    // TODO: Replace with real schoolId from session
-    const schoolId = "demo-school";
+    const session = await getSession();
+    if (!session?.id)
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const schoolId = session.schoolId;
 
     // FETCH CLASSES
     const classes = await ClassList.find({ schoolId }).lean();

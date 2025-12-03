@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB, User } from "@/server/db";
 import bcrypt from "bcryptjs";
 import { getSession } from "@/server/actions";
+import { decrypt } from "@/lib/encryption";
 
 export async function POST(req: NextRequest) {
   await connectDB();
@@ -14,9 +15,27 @@ export async function POST(req: NextRequest) {
   if (!user)
     return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
 
-  const ok = await bcrypt.compare(password, user.passwordHash);
-  if (!ok)
-    return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+  if (user.password) {
+    const decrypted = decrypt(
+      user.password.encrypted,
+      user.password.iv,
+      user.password.tag
+    );
+    if (decrypted !== password)
+      return NextResponse.json(
+        { error: "Invalid credentials" },
+        { status: 401 }
+      );
+  } else if (user.passwordHash) {
+    const ok = await bcrypt.compare(password, user.passwordHash);
+    if (!ok)
+      return NextResponse.json(
+        { error: "Invalid credentials" },
+        { status: 401 }
+      );
+  } else {
+    throw new Error("No password set for this user");
+  }
 
   // set session
   const session = await getSession();
@@ -27,6 +46,7 @@ export async function POST(req: NextRequest) {
   session.schoolId = user.schoolId;
   session.assignedSubjects = user.assignedSubjects;
   session.formClass = user.formClass;
+  session.schoolName = user.school;
   await session.save();
 
   return NextResponse.json({ ok: true });

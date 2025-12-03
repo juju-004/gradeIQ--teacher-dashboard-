@@ -61,6 +61,7 @@ export async function POST(req: NextRequest) {
   session.roles = admin.roles;
   session.assignedSubjects = admin.assignedSubjects;
   session.formClass = admin.formClass;
+  session.schoolName = admin.school;
   await session.save();
 
   return NextResponse.json({ ok: true });

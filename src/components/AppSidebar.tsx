@@ -9,6 +9,7 @@ import {
   User2,
   LogOut,
   LucideProps,
+  Clipboard,
 } from "lucide-react";
 import {
   Sidebar,
@@ -24,6 +25,7 @@ import Link from "next/link";
 import { useAuth } from "@/context/Auth";
 import { logout } from "@/server/actions";
 import { ForwardRefExoticComponent, RefAttributes, useState } from "react";
+import { usePathname } from "next/navigation";
 
 // Role-based tabs
 const roleTabs: Record<
@@ -38,8 +40,8 @@ const roleTabs: Record<
 > = {
   admin: [
     { title: "Dashboard", url: "/", icon: Home },
-    { title: "Manage Staff", url: "/teachers", icon: Users },
-    { title: "Manage Classes", url: "/teachers", icon: Users },
+    { title: "Manage Staff", url: "/staff", icon: Users },
+    { title: "Manage Classes", url: "/classes", icon: Clipboard },
     { title: "School Settings", url: "/settings", icon: Settings },
   ],
   formTeacher: [
@@ -56,6 +58,7 @@ const roleTabs: Record<
 
 const AppSidebar = () => {
   const { user } = useAuth();
+  const pathname = usePathname();
   const [text, setText] = useState("Log Out");
 
   // Aggregate tabs based on roles
@@ -114,12 +117,20 @@ const AppSidebar = () => {
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild className="px-2 py-1">
+                  <SidebarMenuButton
+                    asChild
+                    className={`"px-2 py-1 ${
+                      item.url === pathname ? " bg-white/5" : ""
+                    }`}
+                  >
                     <Link
                       className="flex items-center gap-3 font-semibold text-sm"
                       href={item.url}
                     >
-                      <item.icon size={20} />
+                      <item.icon
+                        className={`${item.url === pathname ? "text-c1" : ""}`}
+                        size={20}
+                      />
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>

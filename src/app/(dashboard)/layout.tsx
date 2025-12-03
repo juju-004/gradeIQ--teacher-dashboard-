@@ -22,14 +22,23 @@ export default async function RootLayout({
     redirect("/login");
   }
 
-  const { id, roles, name, email, assignedSubjects, formClass } = session;
+  const { id, roles, name, email, assignedSubjects, formClass, schoolName } =
+    session;
 
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
 
   return (
     <AuthProvider
-      initialUser={{ id, roles, name, email, assignedSubjects, formClass }}
+      initialUser={{
+        id,
+        roles,
+        name,
+        email,
+        assignedSubjects,
+        formClass,
+        school: schoolName,
+      }}
     >
       <SidebarProvider defaultOpen={defaultOpen}>
         <AppSidebar />
