@@ -76,6 +76,7 @@ export default function StaffSheet({
           name,
           email,
           subjects,
+          formClass,
           roles,
           password,
         });
@@ -96,6 +97,7 @@ export default function StaffSheet({
 
   return (
     <SheetContent>
+      <span className="hidden">{state}</span>{" "}
       <ScrollArea className="h-screen">
         <SheetHeader>
           <SheetTitle className="mb-4">{title}</SheetTitle>

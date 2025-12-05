@@ -4,7 +4,7 @@ import ClassList from "@/server/models/ClassList";
 import { NextResponse } from "next/server";
 
 // GET /api/classes  → fetch classes for a school
-export async function GET(req: Request) {
+export async function GET() {
   try {
     await connectDB();
     const session = await getSession();

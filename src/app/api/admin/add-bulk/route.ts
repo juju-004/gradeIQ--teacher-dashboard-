@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
 import { connectDB, User } from "@/server/db";
 import { getSession } from "@/server/actions";
 import ClassList from "@/server/models/ClassList";

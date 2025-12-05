@@ -115,6 +115,7 @@ export default function EditStaffSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
+      <span className="hidden">{state}</span>
       <SheetContent side="right">
         <ScrollArea className="h-screen">
           <SheetHeader>

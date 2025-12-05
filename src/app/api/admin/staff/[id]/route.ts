@@ -1,3 +1,4 @@
+import { encrypt } from "@/lib/encryption";
 import { getSession } from "@/server/actions";
 import { connectDB, User } from "@/server/db";
 import { NextResponse } from "next/server";
@@ -32,11 +33,13 @@ export async function PUT(
     staff.roles = roles ?? staff.roles;
     staff.subjects = subjects ?? staff.subjects;
     staff.formClass = formClass ?? staff.formClass;
+    staff.password = password ? encrypt(password) : staff.password;
 
     await staff.save();
 
     return NextResponse.json({ ok: true });
   } catch (error) {
+    console.error(error);
     return NextResponse.json(
       { error: "Something went wrong" },
       { status: 500 }
@@ -76,6 +79,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: "Staff deleted successfully" });
   } catch (error) {
+    console.error(error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

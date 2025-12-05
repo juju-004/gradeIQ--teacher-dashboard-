@@ -31,7 +31,7 @@ export function PasswordGeneratorField({
     } else if (schoolName) {
       setPassword(generatePassword(schoolName));
     }
-  }, [schoolName]);
+  }, [schoolName, value]);
 
   const shufflePassword = () => {
     setPassword(generatePassword(schoolName));
