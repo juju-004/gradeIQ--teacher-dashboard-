@@ -17,7 +17,7 @@ import fetcher from "@/lib/fetcher";
 import { Input } from "@/components/ui/input";
 import { Edit, Loader2, Trash2 } from "lucide-react";
 
-export function DeleteClassButton({
+function DeleteClassButton({
   refresh,
   pending,
   cls,
