@@ -56,7 +56,7 @@ const roleTabs: Record<
   ],
 };
 
-const AppSidebar = () => {
+const ASidebar = () => {
   const { user } = useAuth();
   const pathname = usePathname();
   const [text, setText] = useState("Log Out");
@@ -160,4 +160,4 @@ const AppSidebar = () => {
   );
 };
 
-export default AppSidebar;
+export default ASidebar;

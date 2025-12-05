@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 import { getSession } from "@/server/actions";
 import { redirect } from "next/navigation";
 import { AuthProvider } from "@/context/Auth";
-import AppSidebar from "@/components/AppSideBar";
+import ASidebar from "@/components/SideBar";
 
 export const metadata: Metadata = {
   title: "Grade IQ",
@@ -40,7 +40,7 @@ export default async function RootLayout({
       }}
     >
       <SidebarProvider defaultOpen={defaultOpen}>
-        <AppSidebar />
+        <ASidebar />
         <main className="w-full">
           <Navbar />
           <div className="px-4">{children}</div>
