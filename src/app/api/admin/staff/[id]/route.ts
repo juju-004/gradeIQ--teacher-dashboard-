@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { encrypt } from "@/lib/encryption";
 import { getSession } from "@/server/actions";
 import { connectDB, User } from "@/server/db";
