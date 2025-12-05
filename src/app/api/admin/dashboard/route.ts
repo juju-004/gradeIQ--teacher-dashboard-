@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // app/api/dashboard/route.ts
 import { getSession } from "@/server/actions";
 import { connectDB, User } from "@/server/db";

@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getSession } from "@/server/actions";
 import { connectDB } from "@/server/db";
 import ClassList from "@/server/models/ClassList";
