@@ -67,7 +67,7 @@ export default function StaffSheet({
       try {
         const name = formData.get("name");
         const email = formData.get("email");
-        const subjects = (formData.get("subjects") as string).split(",");
+        const subjects = formData.get("subjects");
         const roles = formData.getAll("roles");
         const formClass = formData.getAll("formClass");
         const password = formData.get("password");
@@ -75,7 +75,7 @@ export default function StaffSheet({
         await axios.post("/api/admin/staff", {
           name,
           email,
-          subjects,
+          subjects: typeof subjects === "string" ? subjects.split(",") : [],
           formClass,
           roles,
           password,
@@ -84,6 +84,8 @@ export default function StaffSheet({
         form.reset();
         refresh();
       } catch (error: unknown) {
+        console.log(error);
+
         toast.error(filterError(error));
         return null;
       }
