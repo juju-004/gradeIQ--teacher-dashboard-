@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import { Activation, connectDB, User } from "@/server/db";
 import { getSession } from "@/server/actions";
 
-export function generateSchoolId() {
+function generateSchoolId() {
   const rand = Math.random().toString(36).substring(2, 10).toUpperCase();
   return `SCH-${rand}`;
 }
