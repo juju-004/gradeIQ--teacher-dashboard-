@@ -23,6 +23,7 @@ export function PasswordCell({ value }: PasswordCellProps) {
       <button
         type="button"
         onClick={() => setShow((p) => !p)}
+        onBlur={() => setShow(false)}
         className="text-gray-500 hover:text-gray-700"
       >
         {show ? <EyeOff size={16} /> : <Eye size={16} />}

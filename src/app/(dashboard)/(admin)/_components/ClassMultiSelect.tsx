@@ -14,13 +14,15 @@ export function ClassMultiSelect({
   value,
   onChange,
   name = "formClass",
+  defaultClasses,
 }: {
   value: string[];
+  defaultClasses?: string[];
   onChange: (val: string[]) => void;
   name?: string; // so we can generate hidden fields
 }) {
   const { data, isLoading } = useSWR("/api/admin/classes", fetcher);
-  const classes = data?.classes?.list || [];
+  const classes = defaultClasses ? defaultClasses : data?.classes?.list || [];
 
   const toggleValue = (val: string) => {
     if (value.includes(val)) {

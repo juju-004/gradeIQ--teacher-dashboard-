@@ -3,7 +3,6 @@
 import useSWR from "swr";
 import axios from "axios";
 import { useState, useTransition } from "react";
-import * as XLSX from "xlsx";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -13,7 +12,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogTitle } from "@radix-ui/react-dialog";
 import { toast } from "sonner";
 import fetcher from "@/lib/fetcher";
 import {
@@ -22,7 +20,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Edit, Loader2, Trash2 } from "lucide-react";
+import { Edit, Trash2 } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -30,29 +28,51 @@ import {
 } from "@/components/ui/popover";
 import { FAB } from "@/components/ui/floating-button";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
-import { SidebarMenuButton } from "@/components/ui/sidebar";
-import AddProduct from "@/components/AddProduct";
 import StaffSheet from "@/app/(dashboard)/(admin)/_components/StaffSheet";
 import { PasswordCell } from "@/app/(dashboard)/(admin)/_components/PasswordCell";
 import { filterError } from "@/server/lib";
+import EditStaffSheet from "@/app/(dashboard)/(admin)/_components/EditStaffSheet";
+
+export interface Staff {
+  _id: string;
+  name: string;
+  email: string;
+  roles: ("teacher" | "form teacher")[];
+  school: string;
+  schoolId: string;
+
+  // Optional fields depending on whether teachers have them
+  subjects?: string[];
+  formClass?: string[];
+
+  // Optional encrypted password object
+  password?: string;
+
+  // In case some old users still have passwordHash
+  passwordHash?: string;
+
+  createdAt?: string;
+  updatedAt?: string;
+}
 
 export default function StaffPage() {
   const { data, isLoading, mutate } = useSWR("/api/admin/staff", fetcher);
   const [isDeleting, startTransition] = useTransition();
 
-  const onEdit = (staff: any) => {
-    // open modal or sheet
-    console.log("Edit staff:", staff);
+  const [open, setOpen] = useState(false);
+  const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
+
+  const handleEdit = (staffItem: Staff) => {
+    setSelectedStaff(staffItem);
+    setOpen(true);
   };
 
   const onDelete = async (id: string) => {
     startTransition(async () => {
       try {
-        console.log(id);
-
         await axios.delete(`/api/admin/staff/${id}`);
         toast.success("Deleted");
-        mutate(); // refresh the table
+        mutate();
       } catch (error: unknown) {
         toast.error(filterError(error));
       }
@@ -62,23 +82,7 @@ export default function StaffPage() {
   return (
     <div className="sm:p-6 p-3">
       <h1 className="text-2xl font-bold mb-6">Staff Management</h1>
-
-      {/* <div className="mb-4 flex gap-4">
-        <Button onClick={() => document.getElementById("excel-input")?.click()}>
-          Upload Excel
-        </Button>
-
-        <input
-          type="file"
-          id="excel-input"
-          className="hidden"
-          accept=".xlsx,.xls"
-          onChange={handleUpload}
-        />
-      </div> */}
-
       {/* Staff Table */}
-
       <div className="border rounded-lg p-2 shadow-sm bg-white dark:bg-neutral-900">
         <Table>
           <TableHeader>
@@ -101,7 +105,7 @@ export default function StaffPage() {
               </TableRow>
             )}
 
-            {data?.staff?.map((staff: any, idx: number) => (
+            {data?.staff?.map((staff: Staff, idx: number) => (
               <TableRow
                 key={staff._id}
                 className={"even:bg-muted/80 rounded-lg"}
@@ -111,7 +115,7 @@ export default function StaffPage() {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => onEdit(staff)}
+                      onClick={() => handleEdit(staff)}
                     >
                       <Edit />
                     </Button>
@@ -134,8 +138,13 @@ export default function StaffPage() {
                         </p>
 
                         <div className="flex justify-end space-x-2">
-                          <Button size="sm" variant="destructive">
-                            Delete
+                          <Button
+                            onClick={() => onDelete(staff._id)}
+                            size="sm"
+                            variant="destructive"
+                            disabled={isDeleting}
+                          >
+                            {isDeleting ? "Deleting..." : "Delete"}
                           </Button>
                         </div>
                       </PopoverContent>
@@ -152,7 +161,7 @@ export default function StaffPage() {
                       </DropdownMenuTrigger>
 
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => onEdit(staff)}>
+                        <DropdownMenuItem onClick={() => handleEdit(staff)}>
                           Edit
                         </DropdownMenuItem>
 
@@ -173,10 +182,8 @@ export default function StaffPage() {
                 <TableCell className="font-medium">{staff.name}</TableCell>
                 <TableCell>{staff.email}</TableCell>
                 <TableCell>{staff.roles.join(", ")}</TableCell>
-                <TableCell>
-                  {staff.assignedSubjects?.join(", ") || "-"}
-                </TableCell>
-                <TableCell>{staff.formClass || "-"}</TableCell>
+                <TableCell>{staff.subjects?.join(", ") || "-"}</TableCell>
+                <TableCell>{staff.formClass?.join(", ") || "-"}</TableCell>
                 <TableCell>
                   {staff.password ? (
                     <PasswordCell value={staff.password} />
@@ -191,11 +198,20 @@ export default function StaffPage() {
       </div>
 
       <Sheet>
-        <SheetTrigger asChild>
-          <FAB />
-        </SheetTrigger>
+        <div className="w-full flex justify-end items-center">
+          <SheetTrigger className="mt-3 mr-3" asChild>
+            <FAB />
+          </SheetTrigger>
+        </div>
         <StaffSheet refresh={() => mutate()} title="Add New Staff Member" />
       </Sheet>
+      <EditStaffSheet
+        open={open}
+        refresh={() => mutate()}
+        onOpenChange={setOpen}
+        close={() => setOpen(false)}
+        staff={selectedStaff}
+      />
     </div>
   );
 }

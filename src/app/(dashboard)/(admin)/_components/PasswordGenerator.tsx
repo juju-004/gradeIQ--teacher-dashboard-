@@ -11,17 +11,24 @@ function getInitials(schoolName: string) {
     .join("");
 }
 
-function generatePassword(schoolName: string) {
+export function generatePassword(schoolName: string) {
   const initials = getInitials(schoolName);
   const digits = Math.floor(100000 + Math.random() * 9000000); // returns 6 or 7 digits
   return `${initials}-${digits}`;
 }
-
-export function PasswordGeneratorField({ schoolName }: { schoolName: string }) {
+export function PasswordGeneratorField({
+  schoolName,
+  value,
+}: {
+  schoolName: string;
+  value?: string;
+}) {
   const [password, setPassword] = useState("");
 
   useEffect(() => {
-    if (schoolName) {
+    if (value) {
+      setPassword(value);
+    } else if (schoolName) {
       setPassword(generatePassword(schoolName));
     }
   }, [schoolName]);
@@ -51,10 +58,6 @@ export function PasswordGeneratorField({ schoolName }: { schoolName: string }) {
           <Shuffle className="h-4 w-4" />
         </Button>
       </div>
-
-      <p className="text-xs text-muted-foreground">
-        Auto-generated from school initials + 6–7 unique digits
-      </p>
     </div>
   );
 }

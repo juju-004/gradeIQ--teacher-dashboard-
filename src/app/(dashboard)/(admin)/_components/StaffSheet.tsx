@@ -38,7 +38,7 @@ const roles = ["teacher", "form teacher"] as const;
 const formSchema = z.object({
   name: z.string().min(1, "Staff name is required"),
   email: z.string().email("Valid email is required"),
-  subject: z.string().optional(),
+  subjects: z.string().optional(),
   password: z.string(),
   roles: z.array(z.enum(roles)).min(1, "Select at least one role"),
   formClass: z.array(z.string()),
@@ -57,7 +57,7 @@ export default function StaffSheet({
     defaultValues: {
       name: "",
       email: "",
-      subject: "",
+      subjects: "",
       roles: [],
       formClass: [],
     },
@@ -67,17 +67,15 @@ export default function StaffSheet({
       try {
         const name = formData.get("name");
         const email = formData.get("email");
-        const subject = (formData.get("subject") as string).split(",");
+        const subjects = (formData.get("subjects") as string).split(",");
         const roles = formData.getAll("roles");
         const formClass = formData.getAll("formClass");
         const password = formData.get("password");
 
-        console.log(name, email, subject, roles, formClass, password);
-
         await axios.post("/api/admin/staff", {
           name,
           email,
-          assignedSubjects: subject,
+          subjects,
           roles,
           password,
         });
@@ -200,7 +198,7 @@ export default function StaffSheet({
                 {isTeacher && (
                   <FormField
                     control={form.control}
-                    name="subject"
+                    name="subjects"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Subject(s)</FormLabel>
@@ -241,7 +239,9 @@ export default function StaffSheet({
                   control={form.control}
                   name="password"
                   render={() => (
-                    <PasswordGeneratorField schoolName={user?.school || ""} />
+                    <PasswordGeneratorField
+                      schoolName={user?.school as string}
+                    />
                   )}
                 />
 

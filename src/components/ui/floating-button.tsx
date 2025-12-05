@@ -65,7 +65,7 @@ export function FAB({
       {/* DESKTOP NORMAL BUTTON */}
       <Button
         onClick={onClick}
-        className={`hidden md:flex items-center gap-2 ${className}`}
+        className={`hidden md:flex pr-3 items-center gap-2 ${className}`}
       >
         <Plus className="h-5 w-5" />
         {text}

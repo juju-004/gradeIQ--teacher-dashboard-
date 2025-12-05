@@ -3,17 +3,19 @@ import bcrypt from "bcryptjs";
 import { connectDB, User } from "@/server/db";
 import { getSession } from "@/server/actions";
 import ClassList from "@/server/models/ClassList";
+import { encrypt, generatePassword } from "@/lib/encryption";
 
 export async function POST(req: Request) {
   try {
     await connectDB();
 
     const session = await getSession();
-    if (!session?.id)
+    if (!session?.id || !session?.schoolName)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { classes, staffList } = await req.json();
     const schoolId = session.schoolId;
+    const school = session.schoolName;
 
     if (!classes || !Array.isArray(classes)) {
       return NextResponse.json(
@@ -30,16 +32,17 @@ export async function POST(req: Request) {
        SAVE STAFF (Users)
     --------------------------- */
     for (const staff of staffList) {
-      const passwordHash = await bcrypt.hash(staff.email.split("@")[0], 10);
+      const password = generatePassword(school);
+      const { encrypted, iv, tag } = encrypt(password);
 
       await User.create({
         name: staff.name,
         email: staff.email,
         roles: staff.roles,
-        assignedSubjects: staff.subject || null,
-        formClass: staff.formClass || null,
+        subjects: staff.subjects.split(",") || [],
+        formClass: staff.formClass || [],
         schoolId,
-        passwordHash,
+        password: { encrypted, iv, tag },
       });
     }
 

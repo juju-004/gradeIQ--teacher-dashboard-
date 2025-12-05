@@ -15,8 +15,8 @@ export interface User {
   name: string;
   email: string;
   roles: Array<"admin" | "teacher" | "formTeacher">;
-  assignedSubjects?: string[];
-  formClass?: string | null;
+  subjects?: string[];
+  formClass?: string[];
   school?: string; // optional, if you store school name or id
 }
 

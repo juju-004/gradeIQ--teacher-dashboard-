@@ -4,7 +4,7 @@ import { getSession } from "@/server/actions";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
-  title: "Grade IQ teacher login",
+  title: "Grade IQ | login",
 };
 
 export default async function AuthLayout({

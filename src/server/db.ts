@@ -10,8 +10,8 @@ export interface IUser extends Document {
   email: string;
   passwordHash?: string;
   roles: Role[];
-  assignedSubjects?: string[]; // subject names or ids
-  formClass?: string | null; // e.g., 'SS2B'
+  subjects?: string[];
+  formClass?: string[]; // e.g., 'SS2B'
   school?: string;
   schoolId: string;
   createdAt: Date;
@@ -35,12 +35,12 @@ const UserSchema = new Schema<IUser>(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    passwordHash: { type: String, required: false },
-    roles: { type: [String], required: true, default: ["teacher"] },
-    assignedSubjects: { type: [String], default: [] },
-    formClass: { type: String, default: null },
-    school: { type: String },
+    roles: { type: [String], required: true },
+    subjects: { type: [String], default: [] },
+    formClass: { type: [String], default: [] },
     schoolId: { type: String, required: true },
+    school: { type: String },
+    passwordHash: { type: String, required: false },
     password: {
       encrypted: { type: String, required: false },
       iv: { type: String, required: false },

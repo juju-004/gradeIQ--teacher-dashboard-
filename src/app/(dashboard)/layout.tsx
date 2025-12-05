@@ -22,8 +22,7 @@ export default async function RootLayout({
     redirect("/login");
   }
 
-  const { id, roles, name, email, assignedSubjects, formClass, schoolName } =
-    session;
+  const { id, roles, name, email, subjects, formClass, schoolName } = session;
 
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
@@ -35,7 +34,7 @@ export default async function RootLayout({
         roles,
         name,
         email,
-        assignedSubjects,
+        subjects,
         formClass,
         school: schoolName,
       }}

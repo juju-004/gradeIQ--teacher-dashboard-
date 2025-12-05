@@ -2,7 +2,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Users, BookOpen, Calendar, Plus } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/context/Auth";
@@ -37,12 +36,12 @@ export default function SchoolDashboard({
         </h1>
         <div className="flex gap-2">
           <Button asChild>
-            <Link href="/add-class">
+            <Link href="/classes">
               <Plus className="mr-2" /> Add Class
             </Link>
           </Button>
           <Button asChild>
-            <Link href="/add-staff">
+            <Link href="/staff">
               <Plus className="mr-2" /> Add Staff
             </Link>
           </Button>
@@ -80,59 +79,6 @@ export default function SchoolDashboard({
             <span className="text-2xl font-bold">{studentsCount}</span>
           </CardContent>
         </Card>
-      </div>
-
-      {/* Classes Section */}
-      <div>
-        <h2 className="text-xl font-semibold mb-2">Classes</h2>
-        <ScrollArea className="h-48 border rounded-md p-2">
-          {classes.map((cls, idx) => (
-            <div
-              key={idx}
-              className="flex justify-between items-center py-1 px-2 border-b last:border-b-0"
-            >
-              <span className="font-medium">{cls}</span>
-              <Button variant="ghost" size="sm">
-                View
-              </Button>
-            </div>
-          ))}
-          {classes?.length === 0 && (
-            <p className="text-center text-sm text-neutral-500 mt-2">
-              No classes added yet.
-            </p>
-          )}
-        </ScrollArea>
-      </div>
-
-      {/* Staff Section */}
-      <div>
-        <h2 className="text-xl font-semibold mb-2">Staff Members</h2>
-        <ScrollArea className="h-48 border rounded-md p-2">
-          {staff.map((member, idx) => (
-            <div
-              key={idx}
-              className="flex justify-between items-center py-1 px-2 border-b last:border-b-0"
-            >
-              <div>
-                <p className="font-semibold">{member.name}</p>
-                <p className="text-sm opacity-70">
-                  {member.email} | {member.roles.join(", ")}
-                  {member.subject && ` | Subject: ${member.subject}`}
-                  {member.formClass && ` | Form Class: ${member.formClass}`}
-                </p>
-              </div>
-              <Button variant="ghost" size="sm">
-                View
-              </Button>
-            </div>
-          ))}
-          {staff?.length === 0 && (
-            <p className="text-center text-sm text-neutral-500 mt-2">
-              No staff added yet.
-            </p>
-          )}
-        </ScrollArea>
       </div>
 
       {/* Optional: Add Charts here for performance stats */}

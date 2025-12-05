@@ -41,8 +41,8 @@ export async function POST(req: NextRequest) {
     email,
     passwordHash: hash,
     roles: ["admin"],
-    assignedSubjects: [],
-    formClass: null,
+    subjects: [],
+    formClass: [],
     school,
     schoolId,
   });
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
   session.name = admin.name;
   session.email = admin.email;
   session.roles = admin.roles;
-  session.assignedSubjects = admin.assignedSubjects;
+  session.subjects = admin.subjects;
   session.formClass = admin.formClass;
   session.schoolName = admin.school;
   await session.save();
