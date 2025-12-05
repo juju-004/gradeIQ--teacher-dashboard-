@@ -38,7 +38,7 @@ export async function POST(req: Request) {
         name: staff.name,
         email: staff.email,
         roles: staff.roles,
-        subjects: staff.subjects.split(",") || [],
+        subjects: (staff.subjects ?? "").toString().split(",").filter(Boolean),
         formClass: staff.formClass || [],
         schoolId,
         password: { encrypted, iv, tag },
