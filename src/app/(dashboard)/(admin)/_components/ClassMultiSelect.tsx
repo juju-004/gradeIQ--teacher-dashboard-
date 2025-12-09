@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/popover";
 import { Check, ChevronsUpDown } from "lucide-react";
 import fetcher from "@/lib/fetcher";
+import { IDName } from "@/server/types";
 
 export function ClassMultiSelect({
   value,
@@ -22,7 +23,9 @@ export function ClassMultiSelect({
   name?: string; // so we can generate hidden fields
 }) {
   const { data, isLoading } = useSWR("/api/admin/classes", fetcher);
-  const classes = defaultClasses ? defaultClasses : data?.classes?.list || [];
+  const classes: IDName[] = defaultClasses
+    ? defaultClasses
+    : data?.classes || [];
 
   const toggleValue = (val: string) => {
     if (value.includes(val)) {
@@ -55,15 +58,15 @@ export function ClassMultiSelect({
           {isLoading && <p className="text-sm">Loading...</p>}
 
           <div className="space-y-1">
-            {classes.map((cls: string) => (
+            {classes.map((cls) => (
               <button
                 type="button"
-                key={cls}
-                onClick={() => toggleValue(cls)}
+                key={cls._id}
+                onClick={() => toggleValue(cls.name)}
                 className="flex w-full items-center justify-between rounded px-2 py-1 hover:bg-muted"
               >
-                <span>{cls}</span>
-                {value.includes(cls) && <Check className="h-4 w-4" />}
+                <span>{cls.name}</span>
+                {value.includes(cls.name) && <Check className="h-4 w-4" />}
               </button>
             ))}
           </div>

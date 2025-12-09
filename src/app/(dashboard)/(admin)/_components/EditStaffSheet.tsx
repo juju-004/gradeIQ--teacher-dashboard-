@@ -63,7 +63,6 @@ export default function EditStaffSheet({
     defaultValues: {
       name: staff?.name,
       email: staff?.email,
-      subjects: staff?.subjects?.join(","),
       roles: staff?.roles || [],
       formClass: staff?.formClass || [],
     },
@@ -73,7 +72,6 @@ export default function EditStaffSheet({
       try {
         const name = formData.get("name");
         const email = formData.get("email");
-        const subjects = (formData.get("subjects") as string).split(",");
         const roles = formData.getAll("roles");
         const formClass = formData.getAll("formClass");
         const password = formData.get("password");
@@ -81,7 +79,6 @@ export default function EditStaffSheet({
         await axios.put(`/api/admin/staff/${staff?._id}`, {
           name,
           email,
-          subjects,
           formClass,
           roles,
           password,
@@ -90,6 +87,7 @@ export default function EditStaffSheet({
         refresh();
         close();
       } catch (error: unknown) {
+        console.log(error);
         toast.error(filterError(error));
         return null;
       }
@@ -102,7 +100,6 @@ export default function EditStaffSheet({
       form.reset({
         name: staff.name,
         email: staff.email,
-        subjects: staff.subjects?.join(",") ?? "",
         roles: staff.roles ?? [],
         formClass: staff.formClass ?? [],
       });
@@ -110,7 +107,6 @@ export default function EditStaffSheet({
   }, [staff]);
 
   const rolesSelected = form.watch("roles");
-  const isTeacher = rolesSelected.includes("teacher");
   const isFormTeacher = rolesSelected.includes("form teacher");
 
   return (
@@ -214,27 +210,6 @@ export default function EditStaffSheet({
                       </FormItem>
                     )}
                   />
-
-                  {/* SUBJECT: only when teacher is selected */}
-                  {isTeacher && (
-                    <FormField
-                      control={form.control}
-                      name="subjects"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Subject(s)</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormDescription>
-                            Subjects taught by staff member (seperate with comma
-                            if multiple)
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
 
                   {/* FORM CLASS SELECT: only when form teacher is selected */}
                   {isFormTeacher && (

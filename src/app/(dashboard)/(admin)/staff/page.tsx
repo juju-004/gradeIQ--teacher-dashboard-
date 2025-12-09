@@ -42,13 +42,10 @@ export interface Staff {
   schoolId: string;
 
   // Optional fields depending on whether teachers have them
-  subjects?: string[];
   formClass?: string[];
 
   // Optional encrypted password object
   password?: string;
-
-  // In case some old users still have passwordHash
   passwordHash?: string;
 
   createdAt?: string;
@@ -92,8 +89,7 @@ export default function StaffPage() {
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Roles</TableHead>
-              <TableHead>Subject</TableHead>
-              <TableHead>Form Class</TableHead>
+              <TableHead>Form Class(es)</TableHead>
               <TableHead>Password</TableHead>
             </TableRow>
           </TableHeader>
@@ -182,7 +178,6 @@ export default function StaffPage() {
                 <TableCell className="font-medium">{staff.name}</TableCell>
                 <TableCell>{staff.email}</TableCell>
                 <TableCell>{staff.roles.join(", ")}</TableCell>
-                <TableCell>{staff.subjects?.join(", ") || "-"}</TableCell>
                 <TableCell>{staff.formClass?.join(", ") || "-"}</TableCell>
                 <TableCell>
                   {staff.password ? (

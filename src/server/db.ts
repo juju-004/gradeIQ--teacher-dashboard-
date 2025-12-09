@@ -3,14 +3,13 @@ mongoose.Promise = global.Promise;
 
 // models
 
-export type Role = "admin" | "teacher" | "formTeacher";
+export type Role = "admin" | "teacher" | "form teacher";
 
 export interface IUser extends Document {
   name: string;
   email: string;
   passwordHash?: string;
   roles: Role[];
-  subjects?: string[];
   formClass?: string[]; // e.g., 'SS2B'
   school?: string;
   schoolId: string;
@@ -36,7 +35,6 @@ const UserSchema = new Schema<IUser>(
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     roles: { type: [String], required: true },
-    subjects: { type: [String], default: [] },
     formClass: { type: [String], default: [] },
     schoolId: { type: String, required: true },
     school: { type: String },

@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import fetcher from "@/lib/fetcher";
 import { Input } from "@/components/ui/input";
 import { Edit, Loader2, Trash2 } from "lucide-react";
+import { IDName } from "@/server/types";
 
 function DeleteClassButton({
   refresh,
@@ -65,11 +66,11 @@ export default function ClassesPage() {
   const [isPending, startTransition] = useTransition();
 
   const [editMode, setEditMode] = useState(false);
-  const [classList, setClassList] = useState<string[]>([]);
+  const [classList, setClassList] = useState<IDName[]>([]);
   const [newClass, setNewClass] = useState("");
 
   useEffect(() => {
-    if (data?.classes) setClassList(data.classes?.list);
+    if (data?.classes) setClassList(data.classes);
   }, [data]);
 
   // Add new class
@@ -79,11 +80,7 @@ export default function ClassesPage() {
     if (!newClass.trim()) return;
     startTransition(async () => {
       try {
-        const newClassList = [...classList, newClass.trim()];
-        await axios.put("/api/admin/classes", {
-          classes: newClassList,
-        });
-        setClassList(newClassList);
+        await axios.post("/api/admin/classes", { name: newClass });
         setNewClass("");
         toast.success("Added");
         mutate();
@@ -149,25 +146,25 @@ export default function ClassesPage() {
             )}
 
             {classList?.map((cls, idx) => (
-              <TableRow key={cls} className="even:bg-muted/80">
+              <TableRow key={cls._id} className="even:bg-muted/80">
                 <TableCell className="font-medium">#{idx + 1}</TableCell>
                 <TableCell>
                   {editMode ? (
                     <Input
-                      value={cls}
+                      value={cls.name}
                       onChange={(e) => {
                         const copy = [...classList];
-                        copy[idx] = e.target.value;
+                        copy[idx].name = e.target.value;
                         setClassList(copy);
                       }}
                     />
                   ) : (
-                    cls
+                    cls.name
                   )}
                 </TableCell>
                 <TableCell align="right">
                   <DeleteClassButton
-                    cls={cls}
+                    cls={cls._id}
                     refresh={mutate}
                     pending={isPending}
                   />

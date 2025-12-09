@@ -15,14 +15,7 @@ export async function PUT(
     const { id: staffId } = await context.params;
     const body = await req.json();
 
-    const {
-      name,
-      email,
-      roles,
-      subjects = [],
-      formClass = [],
-      password,
-    } = body;
+    const { name, email, roles, formClass = [], password } = body;
 
     const staff = await User.findById(staffId);
 
@@ -33,7 +26,6 @@ export async function PUT(
     staff.name = name ?? staff.name;
     staff.email = email ?? staff.email;
     staff.roles = roles ?? staff.roles;
-    staff.subjects = subjects ?? staff.subjects;
     staff.formClass = formClass ?? staff.formClass;
     staff.password = password ? encrypt(password) : staff.password;
 

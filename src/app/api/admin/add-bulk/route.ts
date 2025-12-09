@@ -1,9 +1,7 @@
-export const dynamic = "force-dynamic";
-
 import { NextResponse } from "next/server";
 import { connectDB, User } from "@/server/db";
 import { getSession } from "@/server/actions";
-import ClassList from "@/server/models/ClassList";
+import Class from "@/server/models/ClassList";
 import { encrypt, generatePassword } from "@/lib/encryption";
 
 export async function POST(req: Request) {
@@ -24,10 +22,13 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
-    await ClassList.create({
-      list: classes,
-      schoolId,
-    });
+
+    for (const cls of classes) {
+      await Class.create({
+        name: cls,
+        schoolId,
+      });
+    }
 
     /* ---------------------------
        SAVE STAFF (Users)

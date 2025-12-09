@@ -1,26 +1,19 @@
-import { Schema } from "mongoose";
+import { model, models, Schema, Types } from "mongoose";
 
-interface IClass {
+export interface IClass {
+  _id?: Types.ObjectId;
   name: string; // e.g., "Grade 5"
-  subjects: string[]; // e.g., ["Math", "English"]
-}
-
-interface IClassList {
   schoolId: string;
-  list: IClass[];
+  subjects: Types.ObjectId[]; // references to Subject documents
 }
 
-const ClassListSchema = new Schema<IClassList>(
+export const ClassSchema = new Schema<IClass>(
   {
-    schoolId: { type: String, required: true, unique: true },
-    list: [
-      {
-        name: { type: String, required: true },
-        subjects: { type: [String], default: [] },
-      },
-    ],
+    name: { type: String, required: true },
+    schoolId: { type: String, required: true },
+    subjects: [{ type: Schema.Types.ObjectId, ref: "Subject", default: [] }],
   },
   { timestamps: true }
 );
 
-export default ClassListSchema;
+export default models.Class || model<IClass>("Class", ClassSchema);

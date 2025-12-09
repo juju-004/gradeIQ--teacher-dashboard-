@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 // DELETE /api/classes → Optional
 export async function DELETE(
   req: Request,
-  context: { params: Promise<{ name: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getSession();
@@ -16,18 +16,21 @@ export async function DELETE(
     const schoolId = session.schoolId;
     await connectDB();
 
-    const { name } = await context.params;
+    const { id } = await context.params;
 
-    // Pull the class name from the array
-    const updated = await ClassList.findOneAndUpdate(
-      { schoolId },
-      { $pull: { list: name } },
-      { new: true }
-    );
-
-    if (!updated) {
+    if (!id) {
       return NextResponse.json(
-        { error: "Class list not found for this school" },
+        { error: "Class ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Delete the class only if it belongs to the current school
+    const deleted = await ClassList.findOneAndDelete({ _id: id, schoolId });
+
+    if (!deleted) {
+      return NextResponse.json(
+        { error: "Class not found or does not belong to your school" },
         { status: 404 }
       );
     }

@@ -38,7 +38,6 @@ const roles = ["teacher", "form teacher"] as const;
 const formSchema = z.object({
   name: z.string().min(1, "Staff name is required"),
   email: z.string().email("Valid email is required"),
-  subjects: z.string().optional(),
   password: z.string(),
   roles: z.array(z.enum(roles)).min(1, "Select at least one role"),
   formClass: z.array(z.string()),
@@ -57,7 +56,6 @@ export default function StaffSheet({
     defaultValues: {
       name: "",
       email: "",
-      subjects: "",
       roles: [],
       formClass: [],
     },
@@ -67,7 +65,6 @@ export default function StaffSheet({
       try {
         const name = formData.get("name");
         const email = formData.get("email");
-        const subjects = formData.get("subjects");
         const roles = formData.getAll("roles");
         const formClass = formData.getAll("formClass");
         const password = formData.get("password");
@@ -75,7 +72,6 @@ export default function StaffSheet({
         await axios.post("/api/admin/staff", {
           name,
           email,
-          subjects: typeof subjects === "string" ? subjects.split(",") : [],
           formClass,
           roles,
           password,
@@ -94,7 +90,6 @@ export default function StaffSheet({
   );
 
   const rolesSelected = form.watch("roles");
-  const isTeacher = rolesSelected.includes("teacher");
   const isFormTeacher = rolesSelected.includes("form teacher");
 
   return (
@@ -197,27 +192,6 @@ export default function StaffSheet({
                     </FormItem>
                   )}
                 />
-
-                {/* SUBJECT: only when teacher is selected */}
-                {isTeacher && (
-                  <FormField
-                    control={form.control}
-                    name="subjects"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Subject(s)</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormDescription>
-                          Subjects taught by staff member (seperate with comma
-                          if multiple)
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
 
                 {/* FORM CLASS SELECT: only when form teacher is selected */}
                 {isFormTeacher && (

@@ -18,7 +18,6 @@ interface StaffMember {
   name: string;
   email: string;
   roles: Array<"teacher" | "formTeacher">;
-  subjects?: string;
   formClass?: string[];
 }
 
@@ -34,7 +33,6 @@ export default function WelcomeAdminPage() {
     name: "",
     email: "",
     roles: [],
-    subjects: "",
     formClass: [],
   });
   const [loading, setLoading] = useState(false);
@@ -71,10 +69,6 @@ export default function WelcomeAdminPage() {
       toast.error("Please fill in name, email, and select at least one role");
       return;
     }
-    if (staffInput.roles.includes("teacher") && !staffInput.subjects) {
-      toast.error("Please enter a subject for the teacher");
-      return;
-    }
     if (staffInput.roles.includes("formTeacher") && !staffInput.formClass) {
       toast.error("Please select a form class for the form teacher");
       return;
@@ -84,7 +78,6 @@ export default function WelcomeAdminPage() {
       name: "",
       email: "",
       roles: [],
-      subjects: "",
       formClass: [],
     });
   };
@@ -234,18 +227,6 @@ export default function WelcomeAdminPage() {
               </div>
             </div>
 
-            {staffInput.roles.includes("teacher") && (
-              <div>
-                <Label className="mb-2">Subject(s)</Label>
-                <Input
-                  value={staffInput.subjects || ""}
-                  placeholder="e.g., Mathematics"
-                  onChange={(e) =>
-                    setStaffInput({ ...staffInput, subjects: e.target.value })
-                  }
-                />
-              </div>
-            )}
             {staffInput.roles.includes("formTeacher") && (
               <div className="mt-2">
                 <Label className="mb-2">Form Class(es)</Label>
@@ -274,8 +255,7 @@ export default function WelcomeAdminPage() {
                   <p className="font-semibold">{staff.name}</p>
                   <p className="text-sm opacity-70">
                     {staff.email} | {staff.roles.join(", ")}
-                    {staff.subjects && ` | Subject: ${staff.subjects}`}
-                    {staff.formClass && ` | Form Class: ${staff.formClass}`}
+                    {staff.formClass && ` | Form Class(es): ${staff.formClass}`}
                   </p>
                 </div>
                 <Button

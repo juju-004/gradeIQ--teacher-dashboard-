@@ -17,8 +17,6 @@ export async function POST(req: NextRequest) {
   if (!user)
     return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
 
-  console.log(user);
-
   if (user?.password?.encrypted) {
     console.log("yes");
     const decrypted = decrypt(
@@ -49,7 +47,6 @@ export async function POST(req: NextRequest) {
   session.email = user.email;
   session.roles = user.roles;
   session.schoolId = user.schoolId;
-  session.subjects = user.subjects;
   session.formClass = user.formClass;
   session.schoolName = user.school;
   await session.save();

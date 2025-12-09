@@ -38,14 +38,7 @@ export async function POST(req: Request) {
     const schoolId = session.schoolId;
 
     const body = await req.json();
-    const {
-      name,
-      email,
-      roles,
-      subjects = [],
-      formClass = [],
-      password,
-    } = body;
+    const { name, email, roles, formClass = [], password } = body;
 
     if (!name || !email || !roles || !password) {
       return NextResponse.json(
@@ -66,7 +59,6 @@ export async function POST(req: Request) {
       name,
       email,
       roles,
-      subjects,
       formClass,
       password: { encrypted, iv, tag },
       schoolId,
