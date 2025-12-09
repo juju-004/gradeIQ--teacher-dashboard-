@@ -3,6 +3,7 @@ import { Outfit } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { Toaster } from "sonner";
+import { AppToaster } from "@/components/AppToaster";
 
 // Outfit Sans font
 const outfitSans = Outfit({
@@ -36,7 +37,7 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           {children}
-          <Toaster position="top-center" />
+          <AppToaster />
         </ThemeProvider>
       </body>
     </html>

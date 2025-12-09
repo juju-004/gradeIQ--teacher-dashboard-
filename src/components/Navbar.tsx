@@ -19,7 +19,7 @@ const Navbar = () => {
       {/* LEFT */}
       <div className="flex gap-3">
         <SidebarTrigger />
-        <Link href={"/#"} className="text-c1 font-bold">
+        <Link href={"/#"} className="text-c1 text-lg font-bold">
           Grade IQ
         </Link>
       </div>

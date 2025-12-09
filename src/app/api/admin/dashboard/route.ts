@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic";
 import { getSession } from "@/server/actions";
 import { connectDB, User } from "@/server/db";
 import ClassList from "@/server/models/ClassList";
-import StudentList from "@/server/models/StudentList";
+import StudentList from "@/server/models/Student";
 import { NextResponse } from "next/server";
 
 export async function GET() {

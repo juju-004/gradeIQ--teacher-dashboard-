@@ -6,6 +6,7 @@ import { getSession } from "@/server/actions";
 import { redirect } from "next/navigation";
 import { AuthProvider } from "@/context/Auth";
 import ASidebar from "@/components/SideBar";
+import { FormClassProvider } from "@/context/FormClass";
 
 export const metadata: Metadata = {
   title: "Grade IQ",
@@ -39,13 +40,15 @@ export default async function RootLayout({
         school: schoolName,
       }}
     >
-      <SidebarProvider defaultOpen={defaultOpen}>
-        <ASidebar />
-        <main className="w-full">
-          <Navbar />
-          <div className="px-4">{children}</div>
-        </main>
-      </SidebarProvider>
+      <FormClassProvider init={formClass ? formClass[0] : null}>
+        <SidebarProvider defaultOpen={defaultOpen}>
+          <ASidebar />
+          <main className="w-full">
+            <Navbar />
+            <div className="px-4">{children}</div>
+          </main>
+        </SidebarProvider>
+      </FormClassProvider>
     </AuthProvider>
   );
 }

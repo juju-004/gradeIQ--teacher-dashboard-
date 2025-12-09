@@ -1,18 +1,26 @@
-// models/ClassList.ts
-import mongoose, { Schema, Document, model } from "mongoose";
+import { Schema } from "mongoose";
 
-export interface IClassList extends Document {
-  list: string[]; // e.g. "JSS1A", "Grade 4", etc.
+interface IClass {
+  name: string; // e.g., "Grade 5"
+  subjects: string[]; // e.g., ["Math", "English"]
+}
+
+interface IClassList {
   schoolId: string;
+  list: IClass[];
 }
 
 const ClassListSchema = new Schema<IClassList>(
   {
-    list: { type: [String], required: true },
     schoolId: { type: String, required: true, unique: true },
+    list: [
+      {
+        name: { type: String, required: true },
+        subjects: { type: [String], default: [] },
+      },
+    ],
   },
   { timestamps: true }
 );
 
-export default mongoose.models.ClassList ||
-  model<IClassList>("ClassList", ClassListSchema);
+export default ClassListSchema;

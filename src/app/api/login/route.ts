@@ -17,7 +17,10 @@ export async function POST(req: NextRequest) {
   if (!user)
     return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
 
-  if (user.password) {
+  console.log(user);
+
+  if (user?.password?.encrypted) {
+    console.log("yes");
     const decrypted = decrypt(
       user.password.encrypted,
       user.password.iv,

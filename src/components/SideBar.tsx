@@ -10,6 +10,7 @@ import {
   LogOut,
   LucideProps,
   Clipboard,
+  BookOpen,
 } from "lucide-react";
 import {
   Sidebar,
@@ -26,6 +27,7 @@ import { useAuth } from "@/context/Auth";
 import { logout } from "@/server/actions";
 import { ForwardRefExoticComponent, RefAttributes, useState } from "react";
 import { usePathname } from "next/navigation";
+import FormClassSelector from "@/components/FormClassSelector";
 
 // Role-based tabs
 const roleTabs: Record<
@@ -44,10 +46,11 @@ const roleTabs: Record<
     { title: "Manage Classes", url: "/classes", icon: Clipboard },
     { title: "School Settings", url: "/settings", icon: Settings },
   ],
-  formTeacher: [
+  formteacher: [
     { title: "Dashboard", url: "/", icon: Home },
+    { title: "My Class", url: "/my-class", icon: Users },
+    { title: "Subjects & Teachers", url: "/subjects-teachers", icon: BookOpen },
     { title: "Class Results", url: "/class-results", icon: FileText },
-    { title: "Manage Class List", url: "/class-list", icon: Users },
   ],
   teacher: [
     { title: "Dashboard", url: "/", icon: Home },
@@ -71,8 +74,9 @@ const ASidebar = () => {
   }> = [];
   if (user?.roles) {
     user.roles.forEach((role) => {
-      if (roleTabs[role]) {
-        roleTabs[role].forEach((tab) => {
+      const crole = role.split(" ").join("").toLowerCase();
+      if (roleTabs[crole]) {
+        roleTabs[crole].forEach((tab) => {
           // avoid duplicates
           if (!menuItems.find((i) => i.url === tab.url)) menuItems.push(tab);
         });
@@ -95,10 +99,10 @@ const ASidebar = () => {
                   href="/profile"
                   className="flex items-center gap-3 font-semibold text-base"
                 >
-                  <User2 size={22} className="text-c1" />
+                  <User2 size={25} className="text-c1" />
                   <span className="flex flex-col">
-                    <span className="font-bold">{user?.name}</span>
-                    <span className="opacity-70 font-light text-xs">
+                    <span className="font-bold text-base">{user?.name}</span>
+                    <span className="opacity-70 font-light text-sm">
                       {user?.roles}
                     </span>
                   </span>
@@ -108,6 +112,7 @@ const ASidebar = () => {
           </SidebarMenu>
         </SidebarGroup>
 
+        <FormClassSelector></FormClassSelector>
         {/* Application Menu */}
         <SidebarGroup className="dark:bg-black/30 bg-black/5 flex-1 rounded-t-3xl">
           <SidebarGroupLabel className="font-bold text-sm px-2">
