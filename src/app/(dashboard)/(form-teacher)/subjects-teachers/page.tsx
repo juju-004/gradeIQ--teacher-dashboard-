@@ -47,16 +47,18 @@ export default function SubjectTeachersPage() {
   const [open, setOpen] = useState(false);
 
   const deleteSubject = async (subjectId: string) => {
-    try {
-      await axios.delete(
-        `/api/formteacher/${activeClass}/subjects?subjectId=${subjectId}`
-      );
-      toast.success("Subject deleted successfully");
-      mutateSubjects(); // refresh the data
-    } catch (error) {
-      toast.error("Failed to delete subject");
-      console.error(error);
-    }
+    startTransition(async () => {
+      try {
+        await axios.delete(
+          `/api/formteacher/${activeClass}/subjects?subjectId=${subjectId}`
+        );
+        toast.success("Subject deleted successfully");
+        mutateSubjects(); // refresh the data
+      } catch (error) {
+        toast.error("Failed to delete subject");
+        console.error(error);
+      }
+    });
   };
 
   useEffect(() => {

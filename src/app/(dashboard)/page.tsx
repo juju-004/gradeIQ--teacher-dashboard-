@@ -4,7 +4,7 @@ import { useAuth } from "@/context/Auth";
 // import { useDashboardData } from "@/hooks/useDashboard";
 
 export default function DashboardPage() {
-  const { user } = useAuth();
+  // const { user } = useAuth();
   // const { data, error, isLoading } = useDashboardData(user?.roles);
 
   // if (isLoading) return <p>Loading...</p>;
