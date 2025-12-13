@@ -8,10 +8,10 @@ export interface ITeachingAssignment {
   subjectId: Types.ObjectId; // reference to a Subject
 }
 
-export const TeachingAssignmentSchema = new Schema<ITeachingAssignment>(
+const TeachingAssignmentSchema = new Schema<ITeachingAssignment>(
   {
     schoolId: { type: String, required: true },
-    teacherId: { type: Schema.Types.ObjectId, ref: "Teacher", required: true },
+    teacherId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     classId: { type: Schema.Types.ObjectId, ref: "Class", required: true },
     subjectId: { type: Schema.Types.ObjectId, ref: "Subject", required: true },
   },

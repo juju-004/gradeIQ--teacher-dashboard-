@@ -7,7 +7,7 @@ export interface IClass {
   subjects: Types.ObjectId[]; // references to Subject documents
 }
 
-export const ClassSchema = new Schema<IClass>(
+const ClassSchema = new Schema<IClass>(
   {
     name: { type: String, required: true },
     schoolId: { type: String, required: true },

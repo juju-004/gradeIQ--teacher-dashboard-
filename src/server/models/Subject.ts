@@ -1,19 +1,13 @@
 import { model, models, Schema, Types } from "mongoose";
 
-// ---------------------
-// Subject Interface
-// ---------------------
 export interface ISubject {
   _id?: Types.ObjectId;
   name: string; // e.g., "Mathematics"
 }
 
-// ---------------------
-// Subject Schema
-// ---------------------
-export const SubjectSchema = new Schema<ISubject>(
+const SubjectSchema = new Schema<ISubject>(
   {
-    name: { type: String, required: true },
+    name: { type: String, required: true, unique: true },
   },
   { timestamps: true }
 );

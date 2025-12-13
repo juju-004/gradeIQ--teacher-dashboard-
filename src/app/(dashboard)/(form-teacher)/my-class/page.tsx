@@ -156,7 +156,16 @@ export default function StudentsPage() {
           <TableBody>
             {isLoading && (
               <TableRow>
-                <TableCell colSpan={6}>Loading...</TableCell>
+                <TableCell colSpan={6} className="text-center py-6">
+                  Loading...
+                </TableCell>
+              </TableRow>
+            )}
+            {!students?.length && !isLoading && (
+              <TableRow>
+                <TableCell colSpan={12} className="text-center py-6">
+                  No students to show
+                </TableCell>
               </TableRow>
             )}
 

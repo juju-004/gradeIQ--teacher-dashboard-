@@ -103,7 +103,7 @@ const ASidebar = () => {
                   <span className="flex flex-col">
                     <span className="font-bold text-base">{user?.name}</span>
                     <span className="opacity-70 font-light text-sm">
-                      {user?.roles}
+                      {user?.roles.join(", ")}
                     </span>
                   </span>
                 </Link>
