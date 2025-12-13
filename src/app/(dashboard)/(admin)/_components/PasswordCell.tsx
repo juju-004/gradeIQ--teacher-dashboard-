@@ -21,7 +21,7 @@ export function PasswordCell({ value }: PasswordCellProps) {
     try {
       await navigator.clipboard.writeText(value);
       toast.success("Password copied"); // optional feedback
-    } catch (err) {
+    } catch {
       toast.error("Failed to copy");
     }
   };

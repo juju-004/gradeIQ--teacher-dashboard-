@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
-import { Toaster } from "sonner";
 import { AppToaster } from "@/components/AppToaster";
 
 // Outfit Sans font

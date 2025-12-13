@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/select";
 import { useAuth } from "@/context/Auth";
 import { SidebarGroup, SidebarGroupLabel } from "@/components/ui/sidebar";
-import { Label } from "@/components/ui/label";
 
 function FormClassSelector() {
   const { user } = useAuth();

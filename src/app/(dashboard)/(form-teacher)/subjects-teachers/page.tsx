@@ -2,7 +2,7 @@
 
 import useSWR from "swr";
 import axios from "axios";
-import { FormEvent, useEffect, useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import {
   Table,
   TableBody,
@@ -14,12 +14,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import fetcher from "@/lib/fetcher";
-import { Input } from "@/components/ui/input";
-import { Edit, Loader2, Trash2 } from "lucide-react";
+import { Edit, Trash2 } from "lucide-react";
 import { useFormClass } from "@/context/FormClass";
 import AddSubjectForm from "@/app/(dashboard)/(form-teacher)/_components/AddSubjectForm";
-import { filterError } from "@/server/lib";
-import { MultiSelect } from "@/app/(dashboard)/(form-teacher)/_components/MultiSelect";
 import EditSubjectSheet from "@/app/(dashboard)/(form-teacher)/_components/EditSheet";
 
 export type Teacher = {

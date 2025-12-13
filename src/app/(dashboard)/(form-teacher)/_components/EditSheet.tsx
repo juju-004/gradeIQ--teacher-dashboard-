@@ -74,6 +74,7 @@ export default function EditSubjectSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
+      <div className="hidden">{state ? "" : ""}</div>
       <SheetContent side="right">
         <ScrollArea className="h-screen">
           <SheetHeader>

@@ -10,7 +10,6 @@ import {
 import { Check, ChevronsUpDown, X } from "lucide-react";
 import fetcher from "@/lib/fetcher";
 import { IDName } from "@/server/types";
-import { useEffect } from "react";
 
 export function MultiSelect({
   value,

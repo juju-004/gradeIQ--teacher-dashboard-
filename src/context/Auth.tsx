@@ -14,7 +14,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  roles: Array<"admin" | "teacher" | "formTeacher">;
+  roles: Array<"admin" | "teacher" | "form teacher">;
   formClass?: string[];
   school?: string; // optional, if you store school name or id
 }
