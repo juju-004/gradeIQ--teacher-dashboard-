@@ -1,6 +1,6 @@
 "use client";
 // import SchoolDashboard from "@/app/(dashboard)/(admin)/_components/SchoolDashboard";
-import { useAuth } from "@/context/Auth";
+// import { useAuth } from "@/context/Auth";
 // import { useDashboardData } from "@/hooks/useDashboard";
 
 export default function DashboardPage() {
