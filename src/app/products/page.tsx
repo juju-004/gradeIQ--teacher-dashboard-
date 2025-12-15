@@ -111,6 +111,54 @@ const getData = async (): Promise<Product[]> => {
       colors: ["blue", "green"],
       images: { blue: "/products/8b.png", green: "/products/8gr.png" },
     },
+    {
+      id: 8,
+      name: "Levi’s Classic Denim",
+      shortDescription:
+        "Lorem ipsum dolor sit amet consect adipisicing elit lorem ipsum dolor sit.",
+      description:
+        "Lorem ipsum dolor sit amet consect adipisicing elit lorem ipsum dolor sit. Lorem ipsum dolor sit amet consect adipisicing elit lorem ipsum dolor sit. Lorem ipsum dolor sit amet consect adipisicing elit lorem ipsum dolor sit.",
+      price: 59.9,
+      sizes: ["s", "m", "l"],
+      colors: ["blue", "green"],
+      images: { blue: "/products/8b.png", green: "/products/8gr.png" },
+    },
+    {
+      id: 9,
+      name: "Levi’s Classic Denim",
+      shortDescription:
+        "Lorem ipsum dolor sit amet consect adipisicing elit lorem ipsum dolor sit.",
+      description:
+        "Lorem ipsum dolor sit amet consect adipisicing elit lorem ipsum dolor sit. Lorem ipsum dolor sit amet consect adipisicing elit lorem ipsum dolor sit. Lorem ipsum dolor sit amet consect adipisicing elit lorem ipsum dolor sit.",
+      price: 59.9,
+      sizes: ["s", "m", "l"],
+      colors: ["blue", "green"],
+      images: { blue: "/products/8b.png", green: "/products/8gr.png" },
+    },
+    {
+      id: 10,
+      name: "Levi’s Classic Denim",
+      shortDescription:
+        "Lorem ipsum dolor sit amet consect adipisicing elit lorem ipsum dolor sit.",
+      description:
+        "Lorem ipsum dolor sit amet consect adipisicing elit lorem ipsum dolor sit. Lorem ipsum dolor sit amet consect adipisicing elit lorem ipsum dolor sit. Lorem ipsum dolor sit amet consect adipisicing elit lorem ipsum dolor sit.",
+      price: 59.9,
+      sizes: ["s", "m", "l"],
+      colors: ["blue", "green"],
+      images: { blue: "/products/8b.png", green: "/products/8gr.png" },
+    },
+    {
+      id: 11,
+      name: "Levi’s Classic Denim",
+      shortDescription:
+        "Lorem ipsum dolor sit amet consect adipisicing elit lorem ipsum dolor sit.",
+      description:
+        "Lorem ipsum dolor sit amet consect adipisicing elit lorem ipsum dolor sit. Lorem ipsum dolor sit amet consect adipisicing elit lorem ipsum dolor sit. Lorem ipsum dolor sit amet consect adipisicing elit lorem ipsum dolor sit.",
+      price: 59.9,
+      sizes: ["s", "m", "l"],
+      colors: ["blue", "green"],
+      images: { blue: "/products/8b.png", green: "/products/8gr.png" },
+    },
   ];
 };
 

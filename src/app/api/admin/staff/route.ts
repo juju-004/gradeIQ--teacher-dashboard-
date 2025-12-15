@@ -73,3 +73,36 @@ export async function POST(req: Request) {
     );
   }
 }
+
+export async function DELETE(req: Request) {
+  try {
+    await connectDB();
+
+    const session = await getSession();
+    if (!session?.id || !session?.roles?.includes("admin")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { ids } = await req.json();
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return NextResponse.json({ error: "No staff selected" }, { status: 400 });
+    }
+
+    const result = await User.deleteMany({
+      _id: { $in: ids },
+      roles: { $not: { $elemMatch: { $eq: "admin" } } },
+    });
+
+    return NextResponse.json({
+      message: "Staff deleted successfully",
+      deletedCount: result.deletedCount,
+    });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}

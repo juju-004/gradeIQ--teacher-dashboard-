@@ -2,36 +2,14 @@
 
 import useSWR from "swr";
 import axios from "axios";
-import { useState, useTransition } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 import fetcher from "@/lib/fetcher";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Edit, Trash2 } from "lucide-react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { FAB } from "@/components/ui/floating-button";
-import { Sheet, SheetTrigger } from "@/components/ui/sheet";
-import StaffSheet from "@/app/(dashboard)/(admin)/_components/StaffSheet";
-import { PasswordCell } from "@/app/(dashboard)/(admin)/_components/PasswordCell";
 import { filterError } from "@/server/lib";
-import EditStaffSheet from "@/app/(dashboard)/(admin)/_components/EditStaffSheet";
+import { staffColumns } from "@/app/(dashboard)/(admin)/staff/columns";
+import { DataTable } from "@/app/(dashboard)/(admin)/staff/data-table";
+import StaffSheet from "@/app/(dashboard)/(admin)/_components/StaffSheet";
+import { FAB } from "@/components/ui/floating-button";
 
 export interface Staff {
   _id: string;
@@ -54,158 +32,70 @@ export interface Staff {
 
 export default function StaffPage() {
   const { data, isLoading, mutate } = useSWR("/api/admin/staff", fetcher);
-  const [isDeleting, startTransition] = useTransition();
-
   const [open, setOpen] = useState(false);
+  const [open2, setOpen2] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
+  const [isPending, startTransition] = useTransition();
 
-  const handleEdit = (staffItem: Staff) => {
-    setSelectedStaff(staffItem);
-    setOpen(true);
-  };
+  const columns = useMemo(
+    () =>
+      staffColumns({
+        onEdit: (staff) => {
+          setSelectedStaff(staff);
+          setOpen(true);
+        },
+      }),
+    []
+  );
 
-  const onDelete = async (id: string) => {
+  const handleDeleteSelected = (ids: any[]) => {
+    let toReturn = false;
+
     startTransition(async () => {
       try {
-        await axios.delete(`/api/admin/staff/${id}`);
-        toast.success("Deleted");
+        const { data } = await axios.delete("/api/admin/staff", {
+          data: { ids },
+        });
+
+        toast.success(`${data?.deletedCount} staff member(s) deleted`);
         mutate();
-      } catch (error: unknown) {
-        toast.error(filterError(error));
+        toReturn = true;
+      } catch {
+        toast.error("Failed to delete");
       }
     });
+
+    return toReturn;
   };
 
   return (
     <div className="sm:p-6 p-3">
-      <h1 className="text-2xl font-bold mb-6">Staff Management</h1>
-      {/* Staff Table */}
-      <div className="border rounded-lg p-2 shadow-sm bg-white dark:bg-neutral-900">
-        <Table>
-          <TableHeader>
-            <TableRow className="opacity-60">
-              <TableHead></TableHead>
-              <TableHead>#</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Roles</TableHead>
-              <TableHead>Form Class(es)</TableHead>
-              <TableHead>Password</TableHead>
-            </TableRow>
-          </TableHeader>
-
-          <TableBody>
-            {isLoading && (
-              <TableRow>
-                <TableCell colSpan={6}>Loading...</TableCell>
-              </TableRow>
-            )}
-
-            {data?.staff?.map((staff: Staff, idx: number) => (
-              <TableRow
-                key={staff._id}
-                className={"even:bg-muted/80 rounded-lg"}
-              >
-                <TableCell>
-                  <div className="hidden sm:flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleEdit(staff)}
-                    >
-                      <Edit />
-                    </Button>
-
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="text-destructive"
-                        >
-                          <Trash2 />
-                        </Button>
-                      </PopoverTrigger>
-
-                      <PopoverContent className="w-72">
-                        <p className="font-medium">Confirm Delete?</p>
-                        <p className="text-sm text-muted-foreground mb-3">
-                          This cannot be undone.
-                        </p>
-
-                        <div className="flex justify-end space-x-2">
-                          <Button
-                            onClick={() => onDelete(staff._id)}
-                            size="sm"
-                            variant="destructive"
-                            disabled={isDeleting}
-                          >
-                            {isDeleting ? "Deleting..." : "Delete"}
-                          </Button>
-                        </div>
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-
-                  {/* Mobile Dropdown */}
-                  <div className="sm:hidden">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button size="sm" variant="outline">
-                          ⋮
-                        </Button>
-                      </DropdownMenuTrigger>
-
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleEdit(staff)}>
-                          Edit
-                        </DropdownMenuItem>
-
-                        <DropdownMenuItem
-                          onClick={() => onDelete(staff._id)}
-                          disabled={isDeleting}
-                          className="text-destructive"
-                        >
-                          {isDeleting ? "Deleting..." : "Delete"}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </TableCell>
-                <TableCell className="text-c1 font-medium">
-                  #{idx + 1}
-                </TableCell>
-                <TableCell className="font-medium">{staff.name}</TableCell>
-                <TableCell>{staff.email}</TableCell>
-                <TableCell>{staff.roles.join(", ")}</TableCell>
-                <TableCell>{staff.formClass?.join(", ") || "-"}</TableCell>
-                <TableCell>
-                  {staff.password ? (
-                    <PasswordCell value={staff.password} />
-                  ) : (
-                    "-"
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+      <div className="flex justify-between items-center pr-4">
+        <h1 className="text-2xl font-bold mb-6">Staff Management</h1>
+        <FAB onClick={() => setOpen2(true)} />
       </div>
+      {/* Staff Table */}
+      <DataTable
+        columns={columns}
+        data={data?.staff ?? []}
+        isLoading={isLoading}
+        onDelete={handleDeleteSelected}
+        isDeleting={isPending}
+      />
 
-      <Sheet>
-        <div className="w-full flex justify-end items-center">
-          <SheetTrigger className="mt-3 mr-3" asChild>
-            <FAB />
-          </SheetTrigger>
-        </div>
-        <StaffSheet refresh={() => mutate()} title="Add New Staff Member" />
-      </Sheet>
-      <EditStaffSheet
+      <StaffSheet
         open={open}
-        refresh={() => mutate()}
+        refresh={mutate}
         onOpenChange={setOpen}
         close={() => setOpen(false)}
         staff={selectedStaff}
+        isEdit
+      />
+      <StaffSheet
+        open={open2}
+        refresh={mutate}
+        onOpenChange={setOpen2}
+        close={() => setOpen2(false)}
       />
     </div>
   );

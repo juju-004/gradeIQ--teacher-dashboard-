@@ -54,14 +54,13 @@ export function ClassMultiSelect({
           >
             {value.length === 0 ? "Select Form Classes" : value.join(", ")}
             <div className="flex items-center gap-3">
-              <Button
-                size="sm"
-                variant="ghost"
+              <span
                 onClick={() => onChange([])}
-                className="flex items-center gap-1"
+                className="flex items-center gap-1 cursor-pointer text-gray-500 hover:text-gray-700"
+                title="Clear selection"
               >
                 <X size={14} />
-              </Button>
+              </span>
               <ChevronsUpDown className="h-4 w-4 opacity-50" />
             </div>
           </Button>

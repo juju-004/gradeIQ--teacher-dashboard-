@@ -25,9 +25,11 @@ import { Trash2 } from "lucide-react";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  isLoading?: boolean;
 }
 
 export function DataTable<TData, TValue>({
+  isLoading,
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
@@ -52,8 +54,11 @@ export function DataTable<TData, TValue>({
     <div className="rounded-md border">
       {Object.keys(rowSelection).length > 0 && (
         <div className="flex justify-end">
-          <button className="flex items-center gap-2 bg-red-500 text-white px-2 py-1 text-sm rounded-md m-4 cursor-pointer">
-            <Trash2 className="w-4 h-4"/>
+          <button
+            onClick={() => console.log(rowSelection)}
+            className="flex items-center gap-2 bg-red-500 text-white px-2 py-1 text-sm rounded-md m-4 cursor-pointer"
+          >
+            <Trash2 className="w-4 h-4" />
             Delete Product(s)
           </button>
         </div>
@@ -64,7 +69,7 @@ export function DataTable<TData, TValue>({
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 return (
-                  <TableHead key={header.id}>
+                  <TableHead className="!opacity-60" key={header.id}>
                     {header.isPlaceholder
                       ? null
                       : flexRender(

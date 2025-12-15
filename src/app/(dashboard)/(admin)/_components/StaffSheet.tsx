@@ -1,16 +1,20 @@
 "use client";
 
+import { useActionState, useEffect } from "react";
 import {
+  Sheet,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
+  SheetDescription,
 } from "@/components/ui/sheet";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Staff } from "@/app/(dashboard)/(admin)/staff/page";
 
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-
 import {
   Form,
   FormControl,
@@ -20,44 +24,51 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ClassMultiSelect } from "@/app/(dashboard)/(admin)/_components/ClassMultiSelect";
-import { PasswordGeneratorField } from "@/app/(dashboard)/(admin)/_components/PasswordGenerator";
-import { useAuth } from "@/context/Auth";
 import axios from "axios";
 import { toast } from "sonner";
 import { filterError } from "@/server/lib";
-import { useActionState } from "react";
+import { useAuth } from "@/context/Auth";
+import { ClassMultiSelect } from "@/app/(dashboard)/(admin)/_components/ClassMultiSelect";
+import { PasswordGeneratorField } from "@/app/(dashboard)/(admin)/_components/PasswordGenerator";
 
 const roles = ["teacher", "form teacher"] as const;
 
 const formSchema = z.object({
   name: z.string().min(1, "Staff name is required"),
   email: z.string().email("Valid email is required"),
+  subjects: z.string().optional(),
   password: z.string(),
   roles: z.array(z.enum(roles)).min(1, "Select at least one role"),
   formClass: z.array(z.string()),
 });
 
-export default function StaffSheet({
-  title,
-  refresh,
-}: {
-  title: string;
+export interface IStaffSheet {
   refresh: () => void;
-}) {
+  close: () => void;
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  staff?: Staff | null;
+  isEdit?: boolean;
+}
+
+export default function StaffSheet({
+  open,
+  onOpenChange,
+  staff,
+  refresh,
+  close,
+  isEdit,
+}: IStaffSheet) {
   const { user } = useAuth();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      email: "",
-      roles: [],
-      formClass: [],
+      name: staff?.name ?? "",
+      email: staff?.email ?? "",
+      roles: staff?.roles || [],
+      formClass: staff?.formClass || [],
     },
   });
   const [state, formAction, isPending] = useActionState(
@@ -69,19 +80,25 @@ export default function StaffSheet({
         const formClass = formData.getAll("formClass");
         const password = formData.get("password");
 
-        await axios.post("/api/admin/staff", {
+        const url = isEdit
+          ? `/api/admin/staff/${staff?._id}`
+          : "/api/admin/staff";
+        await axios[isEdit ? "put" : "post"](url, {
           name,
           email,
           formClass,
           roles,
           password,
         });
-        toast.success("Staff member created");
-        form.reset();
         refresh();
+        toast.success(isEdit ? "Saved Changes" : "Staff member created");
+
+        if (isEdit) close();
+        else {
+          form.reset();
+        }
       } catch (error: unknown) {
         console.log(error);
-
         toast.error(filterError(error));
         return null;
       }
@@ -89,148 +106,170 @@ export default function StaffSheet({
     undefined
   );
 
+  useEffect(() => {
+    if (staff) {
+      form.reset({
+        name: staff.name,
+        email: staff.email,
+        roles: staff.roles ?? [],
+        formClass: staff.formClass ?? [],
+      });
+    }
+  }, [staff]);
+
   const rolesSelected = form.watch("roles");
   const isFormTeacher = rolesSelected.includes("form teacher");
 
   return (
-    <SheetContent>
-      <span className="hidden">{state}</span>{" "}
-      <ScrollArea className="h-screen">
-        <SheetHeader>
-          <SheetTitle className="mb-4">{title}</SheetTitle>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <span className="hidden">{state}</span>
+      <SheetContent side="right">
+        <ScrollArea className="h-screen">
+          <SheetHeader>
+            <SheetTitle className="mb-4">
+              {isEdit ? "Edit Staff" : "Add Staff"}
+            </SheetTitle>
 
-          <SheetDescription asChild>
-            <Form {...form}>
-              <form action={formAction} className="space-y-8">
-                {/* NAME */}
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Full Name</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormDescription>Staff name</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* EMAIL */}
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Email of the staff member
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* ROLES */}
-                <FormField
-                  control={form.control}
-                  name="roles"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Roles</FormLabel>
-                      <FormControl>
-                        <div className="grid grid-cols-2 gap-4 mt-2">
-                          {roles.map((role) => {
-                            const isChecked = field.value.includes(role);
-
-                            return (
-                              <div
-                                key={role}
-                                className="flex items-center gap-2"
-                              >
-                                <Checkbox
-                                  checked={isChecked}
-                                  onCheckedChange={(checked) => {
-                                    const current = field.value;
-                                    field.onChange(
-                                      checked
-                                        ? [...current, role] // add role
-                                        : current.filter((r) => r !== role) // remove role
-                                    );
-                                  }}
-                                  id={role}
-                                />
-
-                                {/* Label */}
-                                <label
-                                  htmlFor={role}
-                                  className="text-sm capitalize"
-                                >
-                                  {role}
-                                </label>
-
-                                {/* Hidden input ensures form submission works */}
-                                {isChecked && (
-                                  <input
-                                    type="hidden"
-                                    name="roles"
-                                    value={role}
-                                  />
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </FormControl>
-
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* FORM CLASS SELECT: only when form teacher is selected */}
-                {isFormTeacher && (
+            <SheetDescription asChild>
+              <Form {...form}>
+                <form action={formAction} className="space-y-8">
+                  {/* NAME */}
                   <FormField
                     control={form.control}
-                    name="formClass"
+                    name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Form Class</FormLabel>
-                        <ClassMultiSelect
-                          value={field.value}
-                          onChange={field.onChange}
-                        />
+                        <FormLabel>Full Name</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormDescription>Staff name</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* EMAIL */}
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
                         <FormDescription>
-                          Select one or more classes
+                          Email of the staff member
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                )}
-                <Controller
-                  control={form.control}
-                  name="password"
-                  render={() => (
-                    <PasswordGeneratorField
-                      schoolName={user?.school as string}
+
+                  {/* ROLES */}
+                  <FormField
+                    control={form.control}
+                    name="roles"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Roles</FormLabel>
+                        <FormControl>
+                          <div className="grid grid-cols-2 gap-4 mt-2">
+                            {roles.map((role) => {
+                              const isChecked = field.value.includes(role);
+
+                              return (
+                                <div
+                                  key={role}
+                                  className="flex items-center gap-2"
+                                >
+                                  <Checkbox
+                                    checked={isChecked}
+                                    onCheckedChange={(checked) => {
+                                      const current = field.value;
+                                      field.onChange(
+                                        checked
+                                          ? [...current, role] // add role
+                                          : current.filter((r) => r !== role) // remove role
+                                      );
+                                    }}
+                                    id={role}
+                                  />
+
+                                  {/* Label */}
+                                  <label
+                                    htmlFor={role}
+                                    className="text-sm capitalize"
+                                  >
+                                    {role}
+                                  </label>
+
+                                  {/* Hidden input ensures form submission works */}
+                                  {isChecked && (
+                                    <input
+                                      type="hidden"
+                                      name="roles"
+                                      value={role}
+                                    />
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </FormControl>
+
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* FORM CLASS SELECT: only when form teacher is selected */}
+                  {isFormTeacher && (
+                    <FormField
+                      control={form.control}
+                      name="formClass"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Form Class</FormLabel>
+                          <ClassMultiSelect
+                            value={field.value}
+                            onChange={field.onChange}
+                          />
+                          <FormDescription>
+                            Select one or more classes
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
                   )}
-                />
+                  <Controller
+                    control={form.control}
+                    name="password"
+                    render={() => (
+                      <PasswordGeneratorField
+                        value={staff?.password}
+                        schoolName={user?.school || ""}
+                      />
+                    )}
+                  />
 
-                <Button disabled={isPending} type="submit">
-                  {isPending ? "Submitting..." : "Submit"}
-                </Button>
-              </form>
-            </Form>
-          </SheetDescription>
-        </SheetHeader>
-      </ScrollArea>
-    </SheetContent>
+                  {isEdit ? (
+                    <Button disabled={isPending} type="submit">
+                      {isPending ? "Saving..." : "Save Changes"}
+                    </Button>
+                  ) : (
+                    <Button disabled={isPending} type="submit">
+                      {isPending ? "Submitting..." : "Submit"}
+                    </Button>
+                  )}
+                </form>
+              </Form>
+            </SheetDescription>
+          </SheetHeader>
+        </ScrollArea>
+      </SheetContent>
+    </Sheet>
   );
 }
