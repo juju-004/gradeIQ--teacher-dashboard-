@@ -2,76 +2,19 @@
 
 import useSWR from "swr";
 import axios from "axios";
-import { FormEvent, useEffect, useState, useTransition } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { FormEvent, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import fetcher from "@/lib/fetcher";
 import { Input } from "@/components/ui/input";
-import { Edit, Loader2, Trash2 } from "lucide-react";
-import { IDName } from "@/server/types";
-
-function DeleteClassButton({
-  refresh,
-  pending,
-  cls,
-}: {
-  refresh: () => void;
-  pending: boolean;
-  cls: string;
-}) {
-  const [isPending, startTransition] = useTransition();
-
-  // Delete class instantly
-  const deleteClass = async () => {
-    startTransition(async () => {
-      try {
-        await axios.delete(`/api/admin/classes/${cls}`);
-        toast.success("Class deleted");
-        refresh();
-      } catch {
-        toast.error("Failed to delete class");
-      }
-    });
-  };
-
-  return (
-    <Button
-      size="sm"
-      variant="destructive"
-      onClick={deleteClass}
-      disabled={pending || isPending}
-    >
-      <span className="sm:flex hidden">
-        {isPending ? "Deleting..." : "Delete"}
-      </span>
-      {isPending ? (
-        <Loader2 className="sm:hidden animate-spin" />
-      ) : (
-        <Trash2 className="sm:hidden" />
-      )}
-    </Button>
-  );
-}
+import { DataTable } from "@/components/ui/data-table";
+import { classColumns } from "@/app/(dashboard)/(admin)/classes/columns";
 
 export default function ClassesPage() {
   const { data, isLoading, mutate } = useSWR("/api/admin/classes", fetcher);
   const [isPending, startTransition] = useTransition();
-
-  const [editMode, setEditMode] = useState(false);
-  const [classList, setClassList] = useState<IDName[]>([]);
+  const [isPending2, startTransition2] = useTransition();
   const [newClass, setNewClass] = useState("");
-
-  useEffect(() => {
-    if (data?.classes) setClassList(data.classes);
-  }, [data]);
 
   // Add new class
   const addClass = async (e: FormEvent<HTMLFormElement>) => {
@@ -90,92 +33,34 @@ export default function ClassesPage() {
     });
   };
 
-  // Save all edits at once
-  const saveAll = async () => {
-    startTransition(async () => {
+  const handleDeleteSelected = (ids: any[]) => {
+    let toReturn = false;
+
+    startTransition2(async () => {
       try {
-        await axios.put("/api/admin/classes", { classes: classList });
-        toast.success("Classes updated");
-        setEditMode(false);
+        const { data } = await axios.delete("/api/admin/classes", {
+          data: { ids },
+        });
+
+        toast.success(`${data?.deletedCount} class(es) deleted`);
+        toReturn = true;
         mutate();
       } catch {
-        toast.error("Failed to update classes");
+        toast.error("Failed to delete");
       }
     });
-  };
 
+    return toReturn;
+  };
   return (
     <div className="sm:p-6 p-3">
-      <h1 className="text-2xl font-bold mb-6">Class Management</h1>
+      <div className="flex items-start sm:items-center sm:flex-row flex-col justify-between">
+        <h1 className="text-2xl font-bold mb-6">Class(es)</h1>
 
-      <div className="border rounded-lg p-2 shadow-sm bg-white dark:bg-neutral-900">
-        <div className="flex justify-end items-center gap-2 mb-2 pr-3">
-          <Button
-            className="pr-4"
-            onClick={() => setEditMode(!editMode)}
-            size="sm"
-          >
-            {editMode ? (
-              "Cancel"
-            ) : (
-              <>
-                <Edit /> Edit
-              </>
-            )}
-          </Button>
-          {editMode && (
-            <Button onClick={saveAll} size="sm" disabled={isPending}>
-              {isPending ? "Saving..." : "Save Changes"}
-            </Button>
-          )}
-        </div>
-
-        <Table>
-          <TableHeader>
-            <TableRow className="opacity-60">
-              <TableHead>#</TableHead>
-              <TableHead>Class Name</TableHead>
-            </TableRow>
-          </TableHeader>
-
-          <TableBody>
-            {isLoading && (
-              <TableRow>
-                <TableCell colSpan={6}>Loading...</TableCell>
-              </TableRow>
-            )}
-
-            {classList?.map((cls, idx) => (
-              <TableRow key={cls._id} className="even:bg-muted/80">
-                <TableCell className="font-medium">#{idx + 1}</TableCell>
-                <TableCell>
-                  {editMode ? (
-                    <Input
-                      value={cls.name}
-                      onChange={(e) => {
-                        const copy = [...classList];
-                        copy[idx].name = e.target.value;
-                        setClassList(copy);
-                      }}
-                    />
-                  ) : (
-                    cls.name
-                  )}
-                </TableCell>
-                <TableCell align="right">
-                  <DeleteClassButton
-                    cls={cls._id}
-                    refresh={mutate}
-                    pending={isPending}
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-
-        {/* Fixed input at the bottom to quickly add a class */}
-        <form onSubmit={addClass} className="flex gap-2 mt-4">
+        <form
+          onSubmit={addClass}
+          className="flex sm:w-auto w-full sm:my-0 my-3 gap-2 mr-3"
+        >
           <Input
             placeholder="New Class Name"
             value={newClass}
@@ -186,6 +71,14 @@ export default function ClassesPage() {
           </Button>
         </form>
       </div>
+
+      <DataTable
+        columns={classColumns}
+        data={data?.classes ?? []}
+        isLoading={isLoading}
+        onDelete={handleDeleteSelected}
+        isDeleting={isPending2}
+      />
     </div>
   );
 }

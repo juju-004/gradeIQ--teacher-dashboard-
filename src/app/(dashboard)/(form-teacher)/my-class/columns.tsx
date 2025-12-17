@@ -1,17 +1,18 @@
 "use client";
 
-import { PasswordCell } from "@/app/(dashboard)/(admin)/_components/PasswordCell";
-import { Staff } from "@/app/(dashboard)/(admin)/staff/page";
+import { Student } from "@/app/(dashboard)/(form-teacher)/my-class/page";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, Edit2 } from "lucide-react";
 
 type ColumnActions = {
-  onEdit: (staff: Staff) => void;
+  onEdit: (student: Student) => void;
 };
 
-export const staffColumns = (actions: ColumnActions): ColumnDef<Staff>[] => [
+export const studentColumns = (
+  actions: ColumnActions
+): ColumnDef<Student>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -38,34 +39,24 @@ export const staffColumns = (actions: ColumnActions): ColumnDef<Staff>[] => [
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Name
+          Student Name
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
   },
   {
-    accessorKey: "email",
-    header: "Email",
-  },
-  {
-    header: "Roles",
-    cell: ({ row }) => {
-      return row.original.roles.join(", ");
-    },
-  },
-  {
-    header: "Form Class(es)",
-    cell: ({ row }) => {
-      const staff = row.original;
-      return staff.formClass ? staff.formClass.join(", ") : "-";
-    },
-  },
-  {
-    header: "Password",
-    cell: ({ row }) => {
-      const staff = row.original;
-      return staff.password ? <PasswordCell value={staff.password} /> : "-";
+    accessorKey: "sex",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Sex
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
     },
   },
   {

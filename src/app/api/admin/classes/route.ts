@@ -61,36 +61,30 @@ export async function POST(req: Request) {
   }
 }
 
-export async function PUT(req: Request) {
+export async function DELETE(req: Request) {
   try {
-    const session = await getSession();
-    if (!session?.id)
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
     await connectDB();
-    const body = await req.json();
-    const { classes } = body;
-    const schoolId = session.schoolId;
 
-    if (!classes || !Array.isArray(classes))
+    const body = await req.json();
+    const { ids } = body; // expecting an array of IDs
+
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
       return NextResponse.json(
-        { error: "Classes are required" },
+        { error: "No class IDs provided" },
         { status: 400 }
       );
-
-    // Update each class by _id and schoolId
-    for (const cls of classes) {
-      const { _id, name } = cls;
-      if (!_id || !name) continue; // skip invalid entries
-
-      await ClassList.updateOne({ _id, schoolId }, { $set: { name } });
     }
 
-    return NextResponse.json({ ok: true });
+    const result = await ClassList.deleteMany({ _id: { $in: ids } });
+
+    return NextResponse.json({
+      message: "Classes deleted successfully",
+      deletedCount: result.deletedCount,
+    });
   } catch (error) {
-    console.error("UPDATE classes error:", error);
+    console.error(error);
     return NextResponse.json(
-      { error: "Failed to update classes" },
+      { error: "Failed to delete classes" },
       { status: 500 }
     );
   }

@@ -33,22 +33,17 @@ export async function POST(req: Request, { params }: Params) {
         { status: 400 }
       );
 
-    console.log("yes1");
-
     // 1️⃣ Find class
     const classData = await ClassList.findOne({
       schoolId: session.schoolId,
       name: className,
     });
-    console.log("yes2");
 
     if (!classData)
       return NextResponse.json({ error: "Class not found" }, { status: 404 });
 
     // 2️⃣ Find or create subject
     let subject = await Subject.findOne({ name });
-
-    console.log(subject);
 
     if (!subject) {
       subject = await Subject.create({ name });
@@ -59,7 +54,6 @@ export async function POST(req: Request, { params }: Params) {
       classData.subjects.push(subject._id);
       await classData.save();
     }
-    console.log("yes4");
 
     // 4️⃣ Update teaching assignments
     for (const teacherId of teachers) {
@@ -125,7 +119,11 @@ export async function GET(req: Request, { params }: Params) {
     // 4️⃣ Group teachers by subject
     const subjectMap = subjects.map((subject) => {
       const teachers = assignments
-        .filter((a) => String(a.subjectId?._id) === String(subject._id))
+        .filter(
+          (a) =>
+            String(a.subjectId?._id) === String(subject._id) &&
+            a.teacherId !== null
+        )
         .map((a) => a.teacherId);
 
       return {
@@ -189,9 +187,6 @@ export async function PUT(req: Request, { params }: Params) {
       return NextResponse.json({ error: "Class not found" }, { status: 404 });
     }
 
-    // 2️⃣ Update subject name
-    await Subject.updateOne({ _id: subjectId }, { name });
-
     // 3️⃣ Handle teacher assignments
     const existingAssignments = await TeachingAssignment.find({
       schoolId: session.schoolId,
@@ -251,12 +246,12 @@ export async function DELETE(req: Request, { params }: Params) {
     await connectDB();
 
     const { className } = await params;
-    const url = new URL(req.url);
-    const subjectId = url.searchParams.get("subjectId");
+    const body = await req.json();
+    const { ids } = body; // expect an array of subject IDs
 
-    if (!subjectId) {
+    if (!Array.isArray(ids) || ids.length === 0) {
       return NextResponse.json(
-        { error: "Missing subjectId in query" },
+        { error: "No subject IDs provided" },
         { status: 400 }
       );
     }
@@ -271,24 +266,24 @@ export async function DELETE(req: Request, { params }: Params) {
       return NextResponse.json({ error: "Class not found" }, { status: 404 });
     }
 
-    // 3️⃣ Remove subjectId from class's subjects array
+    // 2️⃣ Remove all subject IDs from class's subjects array
     await ClassList.updateOne(
       { _id: classData._id },
-      { $pull: { subjects: subjectId } }
+      { $pull: { subjects: { $in: ids } } }
     );
 
-    // 4️⃣ Delete all teaching assignments for this subject + class
+    // 3️⃣ Delete all teaching assignments for these subjects + class
     await TeachingAssignment.deleteMany({
       schoolId: session.schoolId,
       classId: classData._id,
-      subjectId,
+      subjectId: { $in: ids },
     });
 
-    return NextResponse.json({ message: "Subject deleted successfully" });
+    return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("DELETE /subjects error:", error);
     return NextResponse.json(
-      { error: "Failed to delete subject" },
+      { error: "Failed to delete subjects" },
       { status: 500 }
     );
   }

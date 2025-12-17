@@ -1,17 +1,18 @@
 "use client";
 
-import { PasswordCell } from "@/app/(dashboard)/(admin)/_components/PasswordCell";
-import { Staff } from "@/app/(dashboard)/(admin)/staff/page";
+import { SubjectWithTeachers } from "@/app/(dashboard)/(form-teacher)/subjects-teachers/page";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, Edit2 } from "lucide-react";
 
 type ColumnActions = {
-  onEdit: (staff: Staff) => void;
+  onEdit: (student: SubjectWithTeachers) => void;
 };
 
-export const staffColumns = (actions: ColumnActions): ColumnDef<Staff>[] => [
+export const subjectColumns = (
+  actions: ColumnActions
+): ColumnDef<SubjectWithTeachers>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -38,36 +39,28 @@ export const staffColumns = (actions: ColumnActions): ColumnDef<Staff>[] => [
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Name
+          Subject
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
   },
   {
-    accessorKey: "email",
-    header: "Email",
-  },
-  {
-    header: "Roles",
+    id: "teachers",
+    header: "Teachers",
     cell: ({ row }) => {
-      return row.original.roles.join(", ");
+      const teachers = row.original.teachers;
+
+      return (
+        <span className="text-sm">
+          {teachers.length === 0
+            ? "No teacher assigned"
+            : teachers.map((t) => t.name).join(", ")}
+        </span>
+      );
     },
   },
-  {
-    header: "Form Class(es)",
-    cell: ({ row }) => {
-      const staff = row.original;
-      return staff.formClass ? staff.formClass.join(", ") : "-";
-    },
-  },
-  {
-    header: "Password",
-    cell: ({ row }) => {
-      const staff = row.original;
-      return staff.password ? <PasswordCell value={staff.password} /> : "-";
-    },
-  },
+
   {
     id: "actions",
     cell: ({ row }) => {

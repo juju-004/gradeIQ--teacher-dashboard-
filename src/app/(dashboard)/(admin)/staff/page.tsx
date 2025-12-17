@@ -5,9 +5,8 @@ import axios from "axios";
 import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 import fetcher from "@/lib/fetcher";
-import { filterError } from "@/server/lib";
 import { staffColumns } from "@/app/(dashboard)/(admin)/staff/columns";
-import { DataTable } from "@/app/(dashboard)/(admin)/staff/data-table";
+import { DataTable } from "@/components/ui/data-table";
 import StaffSheet from "@/app/(dashboard)/(admin)/_components/StaffSheet";
 import { FAB } from "@/components/ui/floating-button";
 

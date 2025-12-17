@@ -23,7 +23,7 @@ export async function GET(req: Request, { params }: Params) {
       className,
       schoolId: session.schoolId,
     })
-      .select("_id name")
+      .select("_id name sex")
       .lean();
 
     return NextResponse.json({ students });
@@ -48,13 +48,15 @@ export async function POST(req: Request, { params }: Params) {
 
     const { className } = await params;
     const body = await req.json();
-    const { name } = body;
+    const { name, sex } = body;
 
-    if (!name) {
+    console.log(sex);
+
+    if (!name || !sex) {
       return NextResponse.json({ error: "Missing Name" }, { status: 400 });
     }
 
-    await Student.create({ name, className, schoolId: session.schoolId });
+    await Student.create({ name, className, schoolId: session.schoolId, sex });
 
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch (err) {
@@ -77,30 +79,39 @@ export async function PUT(req: Request, { params }: Params) {
     }
 
     const { className } = await params;
-    const body = await req.json();
-    const { students } = body;
+    const { searchParams } = new URL(req.url);
+    const studentId = searchParams.get("studentId");
+    const { name, sex } = await req.json();
 
-    console.log(students);
-
-    if (!students) {
+    if (!studentId) {
       return NextResponse.json(
-        { error: "Student ID and Name is required" },
+        { error: "studentId is required" },
         { status: 400 }
       );
     }
 
-    students.forEach(async ({ _id, name }: { _id: string; name: string }) => {
-      await Student.findOneAndUpdate(
-        {
-          _id,
-          className,
-          schoolId: session.schoolId,
-        },
-        {
-          name,
-        }
+    if (!name || !sex) {
+      return NextResponse.json(
+        { error: "name and sex are required" },
+        { status: 400 }
       );
+    }
+
+    const student = await Student.findOne({
+      _id: studentId,
+      className,
     });
+
+    if (!student) {
+      return NextResponse.json(
+        { error: "Student not found in this class" },
+        { status: 404 }
+      );
+    }
+
+    student.name = name;
+    student.sex = sex;
+    await student.save();
 
     return NextResponse.json({ ok: true });
   } catch (err) {
@@ -115,36 +126,33 @@ export async function PUT(req: Request, { params }: Params) {
 // DELETE STUDENT
 export async function DELETE(req: Request, { params }: Params) {
   try {
-    await connectDB();
-
     const session = await getSession();
     if (!session?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    await connectDB();
+
     const { className } = await params;
+    const { ids } = await req.json();
 
-    const { searchParams } = new URL(req.url);
-    const id = searchParams.get("id");
-
-    if (!id) {
+    if (!Array.isArray(ids) || ids.length === 0) {
       return NextResponse.json(
-        { error: "Student ID is required" },
+        { error: "No student IDs provided" },
         { status: 400 }
       );
     }
 
-    await Student.findOneAndDelete({
-      _id: id,
-      className,
-      schoolId: session.schoolId,
+    const result = await Student.deleteMany({
+      _id: { $in: ids },
+      className, // or classId if you use that field
     });
 
-    return NextResponse.json({ success: true });
-  } catch (err) {
-    console.error(err);
+    return NextResponse.json({ deletedCount: result.deletedCount });
+  } catch (error) {
+    console.error(error);
     return NextResponse.json(
-      { error: "Failed to delete student" },
+      { error: "Failed to delete students" },
       { status: 500 }
     );
   }

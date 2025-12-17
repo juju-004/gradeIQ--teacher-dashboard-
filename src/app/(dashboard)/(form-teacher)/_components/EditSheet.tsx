@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { FormEvent, useEffect, useState, useTransition } from "react";
 import {
   Sheet,
   SheetContent,
@@ -29,65 +29,74 @@ export default function EditSubjectSheet({
   activeClass,
   refresh,
   close,
+  isEdit,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   close: () => void;
   refresh: () => void;
   activeClass: string;
-  subject: Subject | null;
+  subject?: Subject | null;
+  isEdit?: boolean;
 }) {
   const [selectedTeachers, setSelectedTeachers] = useState<string[]>(
     subject?.teachers.map((t) => t._id) || []
   );
+  const [name, setName] = useState(subject?.name || "");
+  const [isPending, startTransition] = useTransition();
 
-  const [state, formAction, isPending] = useActionState(
-    async (_: unknown, formData: FormData) => {
+  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    startTransition(async () => {
       try {
-        const name = formData.get("name");
-
-        await axios.put(
-          `/api/formteacher/${activeClass}/subjects?subjectId=${subject?._id}`,
-          {
-            name,
-            teachers: selectedTeachers,
-          }
-        );
-
+        const url = isEdit
+          ? `/api/formteacher/${activeClass}/subjects?subjectId=${subject?._id}`
+          : `/api/formteacher/${activeClass}/subjects`;
+        await axios[isEdit ? "put" : "post"](url, {
+          name,
+          teachers: selectedTeachers,
+        });
         toast.success("Subject updated");
         refresh();
-        close();
+        if (isEdit) close();
+        else {
+          setSelectedTeachers([]);
+          setName("");
+        }
       } catch (error) {
         toast.error(filterError(error));
       }
-    },
-    undefined
-  );
+    });
+  };
 
   useEffect(() => {
     if (subject) {
-      document
-        .querySelector<HTMLInputElement>('input[name="name"]')
-        ?.setAttribute("value", subject.name);
+      setName(subject?.name || "");
+      setSelectedTeachers(subject?.teachers.map((t) => t._id));
     }
   }, [subject]);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <div className="hidden">{state ? "" : ""}</div>
       <SheetContent side="right">
         <ScrollArea className="h-screen">
           <SheetHeader>
-            <SheetTitle>Edit Subject</SheetTitle>
+            <SheetTitle>{isEdit ? "Edit" : "New"} Subject</SheetTitle>
 
             <SheetDescription asChild>
-              <form action={formAction} className="space-y-6 mt-6">
+              <form onSubmit={onSubmit} className="space-y-6 mt-6">
                 {/* SUBJECT NAME */}
                 <div className="flex flex-col">
                   <label className="text-sm font-medium mb-2">
                     Subject Name
                   </label>
-                  <Input name="name" defaultValue={subject?.name} />
+                  <Input
+                    value={name}
+                    readOnly={isEdit}
+                    disabled={isEdit}
+                    onChange={(e) => setName(e.target.value)}
+                  />
                 </div>
 
                 {/* TEACHERS */}
@@ -101,7 +110,13 @@ export default function EditSubjectSheet({
                 </div>
 
                 <Button disabled={isPending} type="submit">
-                  {isPending ? "Saving..." : "Save Changes"}
+                  {isPending
+                    ? isEdit
+                      ? "Saving..."
+                      : "Adding..."
+                    : isEdit
+                    ? "Save Changes"
+                    : "Add"}
                 </Button>
               </form>
             </SheetDescription>
