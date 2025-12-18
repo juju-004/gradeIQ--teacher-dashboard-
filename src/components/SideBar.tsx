@@ -11,6 +11,11 @@ import {
   LucideProps,
   Clipboard,
   BookOpen,
+  ClipboardList,
+  BarChart3,
+  TrendingUp,
+  Library,
+  FileCheck,
 } from "lucide-react";
 import {
   Sidebar,
@@ -41,7 +46,7 @@ const roleTabs: Record<
   }>
 > = {
   admin: [
-    { title: "Dashboard", url: "/", icon: Home },
+    // { title: "Dashboard", url: "/", icon: Home },
     { title: "Manage Staff", url: "/staff", icon: Users },
     { title: "Manage Classes", url: "/classes", icon: Clipboard },
     { title: "School Settings", url: "/settings", icon: Settings },
@@ -53,9 +58,13 @@ const roleTabs: Record<
     { title: "Class Results", url: "/class-results", icon: FileText },
   ],
   teacher: [
-    { title: "Dashboard", url: "/", icon: Home },
+    { title: "Home", url: "/", icon: Home },
     { title: "My Students", url: "/my-students", icon: Users },
-    { title: "Enter Marks", url: "/enter-marks", icon: Edit },
+    { title: "Upload & Mark", url: "/assessments", icon: FileCheck },
+    { title: "Library", url: "/library", icon: Library },
+    { title: "Analytics", url: "/analytics", icon: TrendingUp },
+    { title: "Reports", url: "/reports", icon: BarChart3 },
+    { title: "Settings", url: "/settings", icon: Settings },
   ],
 };
 
@@ -128,10 +137,7 @@ const ASidebar = () => {
                       item.url === pathname ? " bg-white/5" : ""
                     }`}
                   >
-                    <Link
-                      className="flex items-center gap-3 font-semibold text-sm"
-                      href={item.url}
-                    >
+                    <Link className="flex items-center gap-3 " href={item.url}>
                       <item.icon
                         className={`${item.url === pathname ? "text-c1" : ""}`}
                         size={20}
@@ -150,7 +156,7 @@ const ASidebar = () => {
                     asChild
                     disabled={text === "Logging Out..."}
                   >
-                    <button className="flex items-center gap-3 font-semibold text-sm text-destructive">
+                    <button className="flex items-center gap-3 text-destructive">
                       <LogOut size={20} />
                       <span>{text}</span>
                     </button>

@@ -11,6 +11,7 @@ import {
 import { Button } from "./ui/button";
 import { useTheme } from "next-themes";
 import { SidebarTrigger } from "./ui/sidebar";
+// import { WorkspaceSelector } from "@/components/WorkSpaceSelector";
 
 const Navbar = () => {
   const { setTheme } = useTheme();
@@ -26,6 +27,7 @@ const Navbar = () => {
 
       <div className="flex items-center gap-4">
         {/* THEME MENU */}
+        {/* <WorkspaceSelector></WorkspaceSelector> */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="icon">
