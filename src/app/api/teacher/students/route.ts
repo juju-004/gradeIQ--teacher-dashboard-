@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { getSession } from "@/server/actions";
 import Student from "@/server/models/Student";
 import { connectDB } from "@/server/db";
+import ClassList from "@/server/models/ClassList";
 
 export async function GET(req: Request) {
   try {
@@ -24,10 +25,19 @@ export async function GET(req: Request) {
 
     await connectDB();
 
+    const classDoc = await ClassList.findOne({
+      _id: classId,
+      schoolId: session.schoolId,
+    }).select("name");
+
+    if (!classDoc) {
+      throw new Error("Class not found");
+    }
+
     const students = await Student.aggregate([
       {
         $match: {
-          classId: new mongoose.Types.ObjectId(classId),
+          className: classDoc.name,
           schoolId: session.schoolId,
         },
       },
@@ -83,9 +93,11 @@ export async function GET(req: Request) {
       { $sort: { name: 1 } },
     ]);
 
-    return NextResponse.json({ students });
+    console.log(students);
+
+    return NextResponse.json(students);
   } catch (error) {
-    console.error("GET /my-students error:", error);
+    // console.error("GET /my-students error:", error);
     return NextResponse.json(
       { error: "Failed to fetch students" },
       { status: 500 }

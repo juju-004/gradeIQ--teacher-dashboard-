@@ -12,76 +12,42 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useWorkspace } from "@/context/Workspace";
 import fetcher from "@/lib/fetcher";
-
-// 👉 use your existing workspace / class context here
-
-type StudentAverage = {
-  name: string;
-  sex: string;
-  averageScore: number | null;
-  assessmentCount: number;
-};
+import {
+  MyStudent,
+  myStudentsColumns,
+} from "@/app/(dashboard)/(teacher)/my-students/columns";
+import { useMemo } from "react";
+import { DataTable } from "@/components/ui/data-table";
 
 export default function StudentsAverageTable() {
   const { workspace } = useWorkspace();
 
-  const { data, isLoading } = useSWR<StudentAverage[]>(
+  const { data, isLoading } = useSWR<MyStudent[]>(
     workspace?.classId && workspace.subjectId
-      ? `/api/teacher/student?classId=${workspace?.classId}&subjectId=${workspace.subjectId}`
+      ? `/api/teacher/students?classId=${workspace?.classId}&subjectId=${workspace.subjectId}`
       : null,
     fetcher
   );
 
-  if (isLoading || !workspace) {
-    return (
-      <div className="space-y-2">
-        {[...Array(5)].map((_, i) => (
-          <Skeleton key={i} className="h-10 w-full" />
-        ))}
-      </div>
-    );
-  }
-
-  if (!data || data.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground text-center py-6">
-        No students found for this subject
-      </p>
-    );
-  }
+  const columns = useMemo(
+    () =>
+      myStudentsColumns({
+        onView: (student) => {},
+      }),
+    []
+  );
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Name</TableHead>
-          <TableHead>Sex</TableHead>
-          <TableHead className="text-center">Assessments</TableHead>
-          <TableHead className="text-right">Average Score</TableHead>
-        </TableRow>
-      </TableHeader>
+    <div className="sm:p-6 p-3">
+      <div className="flex items-start sm:items-center sm:flex-row flex-col justify-between">
+        <h1 className="text-2xl font-bold mb-6">My Students</h1>
+      </div>
 
-      <TableBody>
-        {data.map((student) => (
-          <TableRow key={student.name}>
-            <TableCell className="font-medium">{student.name}</TableCell>
-
-            <TableCell>{student.sex}</TableCell>
-
-            <TableCell className="text-center">
-              {student.assessmentCount}
-            </TableCell>
-
-            <TableCell className="text-right">
-              {student.averageScore !== null ? (
-                <span className="font-semibold">{student.averageScore}</span>
-              ) : (
-                <span className="text-muted-foreground">—</span>
-              )}
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+      <DataTable
+        columns={columns}
+        data={data ?? []}
+        isLoading={isLoading || !workspace ? true : false}
+      />
+    </div>
   );
 }

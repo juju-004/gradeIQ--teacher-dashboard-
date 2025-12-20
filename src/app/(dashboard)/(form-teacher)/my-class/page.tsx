@@ -94,8 +94,6 @@ export default function StudentsPage() {
     });
   };
 
-  console.log(data);
-
   return (
     <div className="sm:p-6 p-3">
       <div className="flex items-start sm:items-center sm:flex-row flex-col justify-between">

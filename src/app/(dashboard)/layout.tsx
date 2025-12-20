@@ -33,7 +33,7 @@ export default async function RootLayout({
         <SidebarProvider defaultOpen={defaultOpen}>
           <ASidebar />
           <main className="w-full">
-            <Navbar roles={roles} />
+            <Navbar />
             <div className="px-4">{children}</div>
           </main>
         </SidebarProvider>
