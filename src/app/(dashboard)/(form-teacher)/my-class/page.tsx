@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import fetcher from "@/lib/fetcher";
 import { Input } from "@/components/ui/input";
-import { Loader2, Trash2 } from "lucide-react";
 import { useFormClass } from "@/context/FormClass";
 import { studentColumns } from "@/app/(dashboard)/(form-teacher)/my-class/columns";
 import { DataTable } from "@/components/ui/data-table";
@@ -26,55 +25,10 @@ export interface Student {
   sex: "M" | "F";
 }
 
-function DeleteStudentButton({
-  refresh,
-  pending,
-  id,
-  activeClass,
-}: {
-  refresh: () => void;
-  pending: boolean;
-  id: string;
-  activeClass: string;
-}) {
-  const [isPending, startTransition] = useTransition();
-
-  // Delete class instantly
-  const deleteStudent = async () => {
-    startTransition(async () => {
-      try {
-        await axios.delete(`/api/formteacher/${activeClass}/students?id=${id}`);
-        toast.success("Student deleted");
-        refresh();
-      } catch {
-        toast.error("Failed to delete student");
-      }
-    });
-  };
-
-  return (
-    <Button
-      size="sm"
-      variant="destructive"
-      onClick={deleteStudent}
-      disabled={pending || isPending}
-    >
-      <span className="sm:flex hidden">
-        {isPending ? "Deleting..." : "Delete"}
-      </span>
-      {isPending ? (
-        <Loader2 className="sm:hidden animate-spin" />
-      ) : (
-        <Trash2 className="sm:hidden" />
-      )}
-    </Button>
-  );
-}
-
 export default function StudentsPage() {
   const { activeClass } = useFormClass();
   const { data, isLoading, mutate } = useSWR(
-    `/api/formteacher/${activeClass}/students`,
+    activeClass ? `/api/formteacher/${activeClass}/students` : null,
     fetcher
   );
   const [isPending, startTransition] = useTransition();
@@ -140,6 +94,8 @@ export default function StudentsPage() {
     });
   };
 
+  console.log(data);
+
   return (
     <div className="sm:p-6 p-3">
       <div className="flex items-start sm:items-center sm:flex-row flex-col justify-between">
@@ -172,87 +128,10 @@ export default function StudentsPage() {
         </form>
       </div>
 
-      {/* <div className="border rounded-lg p-2 shadow-sm bg-white dark:bg-neutral-900">
-        <div className="flex justify-end items-center gap-2 mb-2 pr-3">
-          <Button
-            className="pr-4"
-            onClick={() => setEditMode(!editMode)}
-            size="sm"
-          >
-            {editMode ? (
-              "Cancel"
-            ) : (
-              <>
-                <Edit /> Edit
-              </>
-            )}
-          </Button>
-          {editMode && (
-            <Button onClick={saveAll} size="sm" disabled={isPending}>
-              {isPending ? "Saving..." : "Save Changes"}
-            </Button>
-          )}
-        </div>
-
-        <Table>
-          <TableHeader>
-            <TableRow className="opacity-60">
-              <TableHead>#</TableHead>
-              <TableHead>Student Name</TableHead>
-            </TableRow>
-          </TableHeader>
-
-          <TableBody>
-            {isLoading && (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center py-6">
-                  Loading...
-                </TableCell>
-              </TableRow>
-            )}
-            {!students?.length && !isLoading && (
-              <TableRow>
-                <TableCell colSpan={12} className="text-center py-6">
-                  No students to show
-                </TableCell>
-              </TableRow>
-            )}
-
-            {students?.map((cls, idx) => (
-              <TableRow key={cls._id} className="even:bg-muted/80">
-                <TableCell className="font-medium">#{idx + 1}</TableCell>
-                <TableCell>
-                  {editMode ? (
-                    <Input
-                      value={cls.name}
-                      onChange={(e) => {
-                        const copy = [...students];
-                        copy[idx].name = e.target.value;
-                        setStudents(copy);
-                      }}
-                    />
-                  ) : (
-                    cls.name
-                  )}
-                </TableCell>
-                <TableCell align="right">
-                  <DeleteStudentButton
-                    id={cls._id}
-                    activeClass={activeClass || ""}
-                    refresh={mutate}
-                    pending={isPending}
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div> */}
-
       <DataTable
         columns={columns}
         data={data?.students ?? []}
-        isLoading={isLoading}
+        isLoading={isLoading || !activeClass ? true : false}
         onDelete={handleDeleteSelected}
         isDeleting={isDeleting}
       />

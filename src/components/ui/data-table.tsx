@@ -103,7 +103,7 @@ export function DataTable<TData, TValue>({
           {isLoading ? (
             <TableSkeleton
               rows={3}
-              columns={columns?.length ?? 5}
+              columns={(columns?.length ?? 7) - 2}
               showCheckbox
               showActions
               rowHeight={20}

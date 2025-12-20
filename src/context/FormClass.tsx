@@ -1,28 +1,33 @@
 "use client";
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import axios from "axios";
 
 type FormClassContextType = {
   activeClass: string | null;
   setActiveClass: (value: string) => void;
+  formClasses: string[];
 };
 
 const FormClassContext = createContext<FormClassContextType | null>(null);
 
-export function FormClassProvider({
-  children,
-  init,
-}: {
-  children: React.ReactNode;
-  init: string | null;
-}) {
-  const [activeClass, setActiveClass] = useState<string | null>(init);
+export function FormClassProvider({ children }: { children: React.ReactNode }) {
+  const [activeClass, setActiveClass] = useState<string | null>(null);
+  const [formClasses, setFormClasses] = useState<string[]>([]);
+
+  useEffect(() => {
+    axios.get("/api/formteacher/formClass").then(({ data }) => {
+      setFormClasses(data);
+      if (data.length > 0) setActiveClass(data[0]);
+    });
+  }, []);
 
   return (
     <FormClassContext.Provider
       value={{
-        activeClass,
         setActiveClass,
+        formClasses,
+        activeClass,
       }}
     >
       {children}

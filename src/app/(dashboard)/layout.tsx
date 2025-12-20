@@ -6,8 +6,7 @@ import { getSession } from "@/server/actions";
 import { redirect } from "next/navigation";
 import { AuthProvider } from "@/context/Auth";
 import ASidebar from "@/components/SideBar";
-import { FormClassProvider } from "@/context/FormClass";
-// import { WorkspaceProvider } from "@/context/Workspace";
+import RoleProviders from "@/components/providers/RoleProvider";
 
 export const metadata: Metadata = {
   title: "Grade IQ",
@@ -24,33 +23,21 @@ export default async function RootLayout({
     redirect("/login");
   }
 
-  const { id, roles, name, email, formClass, schoolName } = session;
-
+  const { id, roles, name, email, schoolName: school } = session;
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
 
   return (
-    <AuthProvider
-      initialUser={{
-        id,
-        roles,
-        name,
-        email,
-        formClass,
-        school: schoolName,
-      }}
-    >
-      <FormClassProvider init={formClass ? formClass[0] : null}>
-        {/* <WorkspaceProvider> */}
+    <AuthProvider initialUser={{ id, roles, name, email, school }}>
+      <RoleProviders roles={roles}>
         <SidebarProvider defaultOpen={defaultOpen}>
           <ASidebar />
           <main className="w-full">
-            <Navbar />
+            <Navbar roles={roles} />
             <div className="px-4">{children}</div>
           </main>
         </SidebarProvider>
-        {/* </WorkspaceProvider> */}
-      </FormClassProvider>
+      </RoleProviders>
     </AuthProvider>
   );
 }

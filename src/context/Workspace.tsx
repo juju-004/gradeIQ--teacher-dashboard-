@@ -32,7 +32,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <WorkspaceContext.Provider value={{ workspace, setWorkspace, workspaces }}>
-      {!workspace ? "Loading..." : children}
+      {children}
     </WorkspaceContext.Provider>
   );
 }

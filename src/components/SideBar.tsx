@@ -5,13 +5,11 @@ import {
   Users,
   Settings,
   FileText,
-  Edit,
   User2,
   LogOut,
   LucideProps,
   Clipboard,
   BookOpen,
-  ClipboardList,
   BarChart3,
   TrendingUp,
   Library,
@@ -52,13 +50,12 @@ const roleTabs: Record<
     { title: "School Settings", url: "/settings", icon: Settings },
   ],
   formteacher: [
-    { title: "Dashboard", url: "/", icon: Home },
     { title: "My Class", url: "/my-class", icon: Users },
     { title: "Subjects & Teachers", url: "/subjects-teachers", icon: BookOpen },
     { title: "Class Results", url: "/class-results", icon: FileText },
   ],
   teacher: [
-    { title: "Home", url: "/", icon: Home },
+    { title: "Overview", url: "/", icon: Home },
     { title: "My Students", url: "/my-students", icon: Users },
     { title: "Upload & Mark", url: "/assessments", icon: FileCheck },
     { title: "Library", url: "/library", icon: Library },
@@ -121,10 +118,9 @@ const ASidebar = () => {
           </SidebarMenu>
         </SidebarGroup>
 
-        <FormClassSelector></FormClassSelector>
         {/* Application Menu */}
         <SidebarGroup className="dark:bg-black/30 bg-black/5 flex-1 rounded-t-3xl">
-          <SidebarGroupLabel className="font-bold text-sm px-2">
+          <SidebarGroupLabel className="text-sm px-2 opacity-50">
             Application
           </SidebarGroupLabel>
           <SidebarGroupContent>

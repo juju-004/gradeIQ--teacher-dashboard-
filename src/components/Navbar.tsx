@@ -11,13 +11,15 @@ import {
 import { Button } from "./ui/button";
 import { useTheme } from "next-themes";
 import { SidebarTrigger } from "./ui/sidebar";
-// import { WorkspaceSelector } from "@/components/WorkSpaceSelector";
+import { WorkspaceSelector } from "@/components/WorkSpaceSelector";
+import { useAuth } from "@/context/Auth";
+import FormClassSelector from "@/components/FormClassSelector";
 
 const Navbar = () => {
   const { setTheme } = useTheme();
+  const { user } = useAuth();
   return (
     <nav className="p-4 flex items-center justify-between sticky top-0 bg-background z-10">
-      {/* LEFT */}
       <div className="flex gap-3">
         <SidebarTrigger />
         <Link href={"/#"} className="text-c1 text-lg font-bold">
@@ -26,8 +28,8 @@ const Navbar = () => {
       </div>
 
       <div className="flex items-center gap-4">
-        {/* THEME MENU */}
-        {/* <WorkspaceSelector></WorkspaceSelector> */}
+        {user?.roles.includes("form teacher") && <FormClassSelector />}
+        {user?.roles.includes("teacher") && <WorkspaceSelector />}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="icon">

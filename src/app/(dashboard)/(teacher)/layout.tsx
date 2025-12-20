@@ -1,3 +1,4 @@
+import { WorkspaceProvider } from "@/context/Workspace";
 import { getSession } from "@/server/actions";
 import { redirect } from "next/navigation";
 
@@ -9,6 +10,6 @@ export default async function AdminLayout({
   const session = await getSession();
 
   if (session?.roles.includes("teacher")) {
-    return <>{children}</>;
+    return <WorkspaceProvider>{children}</WorkspaceProvider>;
   } else redirect("/login");
 }

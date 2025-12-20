@@ -1,6 +1,5 @@
 "use client";
 
-import React, { useState } from "react";
 import {
   Select,
   SelectContent,
@@ -8,18 +7,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAuth } from "@/context/Auth";
 import { SidebarGroup, SidebarGroupLabel } from "@/components/ui/sidebar";
+import { useFormClass } from "@/context/FormClass";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function FormClassSelector() {
-  const { user } = useAuth();
-  const classes = user?.formClass ?? []; // example: ["JSS 1A", "JSS 2B"]
-
-  const [activeClass, setActiveClass] = useState(classes[0] ?? "");
+  const { activeClass, setActiveClass, formClasses } = useFormClass();
 
   return (
     <>
-      {classes.length > 0 && (
+      {activeClass ? (
         <SidebarGroup className="px-2 w-full">
           <SidebarGroupLabel className="px-2 text-foreground">
             <Select value={activeClass} onValueChange={setActiveClass}>
@@ -27,7 +24,7 @@ function FormClassSelector() {
                 <SelectValue placeholder="Select Class" />
               </SelectTrigger>
               <SelectContent>
-                {classes.map((cls) => (
+                {formClasses.map((cls) => (
                   <SelectItem key={cls} value={cls}>
                     {cls}
                   </SelectItem>
@@ -36,6 +33,8 @@ function FormClassSelector() {
             </Select>
           </SidebarGroupLabel>
         </SidebarGroup>
+      ) : (
+        <Skeleton className="h-9 w-32" />
       )}
     </>
   );

@@ -22,7 +22,7 @@ export default function SubjectTeachersPage() {
   const { activeClass } = useFormClass();
 
   const { data, isLoading, mutate } = useSWR(
-    `/api/formteacher/${activeClass}/subjects`,
+    activeClass ? `/api/formteacher/${activeClass}/subjects` : null,
     fetcher
   );
 
