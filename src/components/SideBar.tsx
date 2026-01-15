@@ -58,9 +58,7 @@ const roleTabs: Record<
     { title: "Overview", url: "/", icon: Home },
     { title: "My Students", url: "/my-students", icon: Users },
     { title: "Upload & Mark", url: "/assessments", icon: FileCheck },
-    { title: "Library", url: "/library", icon: Library },
-    { title: "Analytics", url: "/analytics", icon: TrendingUp },
-    { title: "Reports", url: "/reports", icon: BarChart3 },
+    { title: "Library", url: "/library", icon: BarChart3 },
     { title: "Settings", url: "/settings", icon: Settings },
   ],
 };
@@ -93,7 +91,7 @@ const ASidebar = () => {
   return (
     <Sidebar
       collapsible="icon"
-      className="!rounded-r-[10%] w-48 sm:w-44 md:w-52 shadow-lg border-r border-neutral-200 dark:border-neutral-800"
+      className="!rounded-r-[10%] w-48 sm:w-44 md:w-56 shadow-lg border-r border-neutral-200 dark:border-neutral-800"
     >
       <SidebarContent>
         {/* User Info */}
@@ -120,16 +118,13 @@ const ASidebar = () => {
 
         {/* Application Menu */}
         <SidebarGroup className="dark:bg-black/30 bg-black/5 flex-1 rounded-t-3xl">
-          <SidebarGroupLabel className="text-sm px-2 opacity-50">
-            Application
-          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
-                    className={`"px-2 py-1 ${
+                    className={`"px-2 h-11  ${
                       item.url === pathname ? " bg-white/5" : ""
                     }`}
                   >
@@ -138,7 +133,7 @@ const ASidebar = () => {
                         className={`${item.url === pathname ? "text-c1" : ""}`}
                         size={20}
                       />
-                      <span>{item.title}</span>
+                      <span className="text-sm">{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -148,13 +143,13 @@ const ASidebar = () => {
               <form onSubmit={() => setText("Logging Out...")} action={logout}>
                 <SidebarMenuItem>
                   <SidebarMenuButton
-                    className="active:opacity-70 duration-150 px-2 py-1"
                     asChild
+                    className="active:opacity-70 h-11 duration-150 px-2 py-1"
                     disabled={text === "Logging Out..."}
                   >
                     <button className="flex items-center gap-3 text-destructive">
                       <LogOut size={20} />
-                      <span>{text}</span>
+                      <span className="text-sm">{text}</span>
                     </button>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

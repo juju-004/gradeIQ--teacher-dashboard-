@@ -1,15 +1,6 @@
 "use client";
 
 import useSWR from "swr";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useWorkspace } from "@/context/Workspace";
 import fetcher from "@/lib/fetcher";
 import {

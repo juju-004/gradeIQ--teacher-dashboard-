@@ -19,7 +19,7 @@ const Navbar = () => {
   const { setTheme } = useTheme();
   const { user } = useAuth();
   return (
-    <nav className="p-4 flex items-center justify-between sticky top-0 bg-background z-10">
+    <nav className="p-4 flex items-center justify-between sticky top-0 bg-background z-40">
       <div className="flex gap-3">
         <SidebarTrigger />
         <Link href={"/#"} className="text-c1 text-lg font-bold">
