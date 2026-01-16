@@ -1,10 +1,10 @@
-import { AnswerOption } from "@/app/(dashboard)/(teacher)/_components/omr/AnswerKeySelect";
+import { AnswerOption } from "@/app/(dashboard)/(teacher)/_types/assessments.types";
 import { memo } from "react";
 
 interface AnswerRowProps {
   questionNumber: number;
   value: AnswerOption;
-  options: string[]; // ← NEW
+  options: string[];
   onChange: (value: AnswerOption) => void;
 }
 
