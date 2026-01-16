@@ -50,8 +50,6 @@ export async function POST(req: Request, { params }: Params) {
     const body = await req.json();
     const { name, sex } = body;
 
-    console.log(sex);
-
     if (!name || !sex) {
       return NextResponse.json({ error: "Missing Name" }, { status: 400 });
     }

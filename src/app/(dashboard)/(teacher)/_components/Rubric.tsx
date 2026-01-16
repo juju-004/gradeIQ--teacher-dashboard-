@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  AnswerKeySelect,
-  AnswerOption,
-} from "@/app/(dashboard)/(teacher)/_components/omr/AnswerKeySelect";
-import { OptionScheme } from "@/app/(dashboard)/(teacher)/assessments/page";
+import { AnswerKeySelect } from "@/app/(dashboard)/(teacher)/_components/omr/AnswerKeySelect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +14,7 @@ import {
 import { UploadIcon } from "lucide-react";
 import { Dispatch, SetStateAction, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { AnswerOption } from "@/app/(dashboard)/(teacher)/_types/assessments.types";
 
 export type MarkingSchemeType = "omr" | "handwritten";
 

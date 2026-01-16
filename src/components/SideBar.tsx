@@ -11,8 +11,6 @@ import {
   Clipboard,
   BookOpen,
   BarChart3,
-  TrendingUp,
-  Library,
   FileCheck,
 } from "lucide-react";
 import {
@@ -20,7 +18,6 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -30,7 +27,6 @@ import { useAuth } from "@/context/Auth";
 import { logout } from "@/server/actions";
 import { ForwardRefExoticComponent, RefAttributes, useState } from "react";
 import { usePathname } from "next/navigation";
-import FormClassSelector from "@/components/FormClassSelector";
 
 // Role-based tabs
 const roleTabs: Record<
@@ -57,7 +53,7 @@ const roleTabs: Record<
   teacher: [
     { title: "Overview", url: "/", icon: Home },
     { title: "My Students", url: "/my-students", icon: Users },
-    { title: "Upload & Mark", url: "/assessments", icon: FileCheck },
+    { title: "Upload & Mark", url: "/assessment", icon: FileCheck },
     { title: "Library", url: "/library", icon: BarChart3 },
     { title: "Settings", url: "/settings", icon: Settings },
   ],

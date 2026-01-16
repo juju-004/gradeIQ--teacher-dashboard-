@@ -2,7 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown, Eye } from "lucide-react";
+import { ArrowUpDown } from "lucide-react";
 
 export type MyStudent = {
   _id: string;
@@ -16,9 +16,7 @@ type ColumnActions = {
   onView: (student: MyStudent) => void;
 };
 
-export const myStudentsColumns = (
-  actions: ColumnActions
-): ColumnDef<MyStudent>[] => [
+export const myStudentsColumns: ColumnDef<MyStudent>[] = [
   // Student name
   {
     accessorKey: "name",
@@ -31,6 +29,7 @@ export const myStudentsColumns = (
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
+    cell: ({ row }) => <span className="ml-3">{row.original.name}</span>,
   },
 
   // Sex
@@ -69,28 +68,28 @@ export const myStudentsColumns = (
       const avg = row.original.averageScore;
 
       return avg === null ? (
-        <span className="text-muted-foreground italic">No scores</span>
+        <span className="text-muted-foreground italic ml-3">No scores</span>
       ) : (
-        <span className="font-medium">{avg}%</span>
+        <span className="font-medium ml-3">{avg}%</span>
       );
     },
   },
 
   // View action
-  {
-    id: "actions",
-    cell: ({ row }) => {
-      const student = row.original;
+  // {
+  //   id: "actions",
+  //   cell: ({ row }) => {
+  //     const student = row.original;
 
-      return (
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => actions.onView(student)}
-        >
-          <Eye className="h-4 w-4" />
-        </Button>
-      );
-    },
-  },
+  //     return (
+  //       <Button
+  //         variant="ghost"
+  //         size="icon"
+  //         onClick={() => actions.onView(student)}
+  //       >
+  //         <Eye className="h-4 w-4" />
+  //       </Button>
+  //     );
+  //   },
+  // },
 ];

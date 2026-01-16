@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB, User } from "@/server/db";
 import bcrypt from "bcryptjs";
@@ -18,7 +16,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
 
   if (user?.password?.encrypted) {
-    console.log("yes");
     const decrypted = decrypt(
       user.password.encrypted,
       user.password.iv,

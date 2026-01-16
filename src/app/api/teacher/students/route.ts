@@ -44,27 +44,37 @@ export async function GET(req: Request) {
 
       {
         $lookup: {
-          from: "grades",
+          from: "studentassessmentresults",
           let: { studentId: "$_id" },
           pipeline: [
             {
               $match: {
                 $expr: {
-                  $and: [
-                    { $eq: ["$studentId", "$$studentId"] },
-                    { $eq: ["$classId", new mongoose.Types.ObjectId(classId)] },
-                    {
-                      $eq: [
-                        "$subjectId",
-                        new mongoose.Types.ObjectId(subjectId),
-                      ],
-                    },
-                  ],
+                  $eq: ["$studentId", "$$studentId"],
                 },
               },
             },
+
+            {
+              $lookup: {
+                from: "assessments",
+                localField: "assessmentId",
+                foreignField: "_id",
+                as: "assessment",
+              },
+            },
+
+            { $unwind: "$assessment" },
+
+            {
+              $match: {
+                "assessment.classId": new mongoose.Types.ObjectId(classId),
+                "assessment.subjectId": new mongoose.Types.ObjectId(subjectId),
+                "assessment.schoolId": session.schoolId,
+              },
+            },
           ],
-          as: "grades",
+          as: "results",
         },
       },
 
@@ -72,12 +82,12 @@ export async function GET(req: Request) {
         $addFields: {
           averageScore: {
             $cond: [
-              { $gt: [{ $size: "$grades" }, 0] },
-              { $avg: "$grades.score" },
+              { $gt: [{ $size: "$results" }, 0] },
+              { $avg: "$results.percentage" },
               null,
             ],
           },
-          assessmentCount: { $size: "$grades" },
+          assessmentCount: { $size: "$results" },
         },
       },
 
@@ -92,8 +102,6 @@ export async function GET(req: Request) {
 
       { $sort: { name: 1 } },
     ]);
-
-    console.log(students);
 
     return NextResponse.json(students);
   } catch (error) {

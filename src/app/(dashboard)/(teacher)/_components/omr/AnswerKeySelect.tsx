@@ -1,7 +1,6 @@
 import { useEffect, useCallback, SetStateAction } from "react";
 import { AnswerRow } from "./AnswerRow";
-
-export type AnswerOption = "-" | string;
+import { AnswerOption } from "@/app/(dashboard)/(teacher)/_types/assessments.types";
 
 interface AnswerKeyProps {
   numberOfQuestions: number;
@@ -18,10 +17,13 @@ export function AnswerKeySelect({
   setAnswers,
   optionCount = 4,
 }: AnswerKeyProps) {
-  const options = Array.from(
-    { length: optionCount },
-    (_, i) => String.fromCharCode(65 + i) // A, B, C...
-  );
+  const options = [
+    "-",
+    ...Array.from(
+      { length: optionCount },
+      (_, i) => String.fromCharCode(65 + i) // A, B, C...
+    ),
+  ];
 
   /** Initialize / resize */
   useEffect(() => {

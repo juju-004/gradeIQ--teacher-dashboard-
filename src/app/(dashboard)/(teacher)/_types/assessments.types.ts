@@ -16,3 +16,5 @@ export enum RubricType {
   CHECKLIST = "checklist",
   NUMERIC = "numeric",
 }
+
+export type AnswerOption = "-" | string;

@@ -13,17 +13,14 @@ import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { useWorkspace } from "@/context/Workspace";
 import { toast } from "sonner";
-import {
-  AnswerKeySelect,
-  AnswerOption,
-} from "@/app/(dashboard)/(teacher)/_components/omr/AnswerKeySelect";
+import { AnswerKeySelect } from "@/app/(dashboard)/(teacher)/_components/omr/AnswerKeySelect";
 import { UploadCloud } from "lucide-react";
 import { AnswerKeySkeleton } from "@/app/(dashboard)/(teacher)/_components/omr/AnswerKeySkeleton";
-import { SimplifiedStudentOMR } from "@/app/(dashboard)/(teacher)/assessments/page";
+import { SimplifiedStudentOMR } from "@/app/(dashboard)/(teacher)/assessment/page";
+import { AnswerOption } from "@/app/(dashboard)/(teacher)/_types/assessments.types";
 
 export type StudentOMRState = {
   file: File | null;
-  previewUrl: string | null;
   answers?: AnswerOption[]; // extracted or manually entered
 };
 
@@ -53,7 +50,7 @@ export default function UploadPage({
             file: null,
             previewUrl: null,
           },
-    [activeStudentId]
+    [studentOMRMap, activeStudentId]
   );
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -67,27 +64,18 @@ export default function UploadPage({
       [activeStudentId]: {
         ...prev[activeStudentId],
         file: selectedFile,
-        previewUrl: selectedFile.type.startsWith("image/")
-          ? URL.createObjectURL(selectedFile)
-          : null,
       },
     }));
 
-    console.log(studentOMRMap);
-
-    // setTimeout(() => {
-    //   setStudentOMRMap((prev) => ({
-    //     ...prev,
-    //     [activeStudentId]: {
-    //       ...prev[activeStudentId],
-    //       file: selectedFile,
-    //       previewUrl: selectedFile.type.startsWith("image/")
-    //         ? URL.createObjectURL(selectedFile)
-    //         : null,
-    //       answers: Array(questionsCount).fill("-"),
-    //     },
-    //   }));
-    // }, 7000);
+    setTimeout(() => {
+      setStudentOMRMap((prev) => ({
+        ...prev,
+        [activeStudentId]: {
+          ...prev[activeStudentId],
+          answers: Array(questionsCount).fill("-"),
+        },
+      }));
+    }, 7000);
   };
 
   function getSimplifiedStudentOMR(
@@ -98,7 +86,6 @@ export default function UploadPage({
 
     return students.map((student) => ({
       id: student.id,
-      name: student.name,
       answers: studentOMRMap[student.id]?.answers,
     }));
   }
@@ -145,18 +132,15 @@ export default function UploadPage({
             {!activeStud.file ? (
               <div className="fx flex-col py-24">
                 <UploadCloud className="mb-4 text-muted-foreground" size={32} />
-
                 <h3 className="font-semibold mb-1">Upload student script</h3>
-
                 <p className="text-sm text-muted-foreground text-center mb-4">
                   Upload a clear image or photo of the student’s omr sheet
                 </p>
-
                 <label>
                   <input
                     ref={inputRef}
                     type="file"
-                    accept="image/*,.pdf"
+                    accept="image/*"
                     hidden
                     onChange={handleFileChange}
                   />
@@ -172,7 +156,7 @@ export default function UploadPage({
               <div className="border w-full flex items-start gap-7">
                 <div className="max-w-xs border hidden md:flex relative rounded-md overflow-hidden">
                   <img
-                    src={activeStud.previewUrl || ""}
+                    src={URL.createObjectURL(activeStud.file) || ""}
                     alt="Preview"
                     className="w-full h-auto object-contain rounded-md"
                   />

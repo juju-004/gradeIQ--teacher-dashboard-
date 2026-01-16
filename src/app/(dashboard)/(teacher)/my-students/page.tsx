@@ -20,14 +20,6 @@ export default function StudentsAverageTable() {
     fetcher
   );
 
-  const columns = useMemo(
-    () =>
-      myStudentsColumns({
-        onView: (student) => {},
-      }),
-    []
-  );
-
   return (
     <div className="sm:p-6 p-3">
       <div className="flex items-start sm:items-center sm:flex-row flex-col justify-between">
@@ -35,7 +27,7 @@ export default function StudentsAverageTable() {
       </div>
 
       <DataTable
-        columns={columns}
+        columns={myStudentsColumns}
         data={data ?? []}
         isLoading={isLoading || !workspace ? true : false}
       />
