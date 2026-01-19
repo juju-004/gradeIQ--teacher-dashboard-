@@ -17,8 +17,8 @@ export const metadata: Metadata = {
   description:
     "Grade IQ helps students and teachers analyze grades, track performance, and generate insights with ease.",
   icons: [
-    { rel: "icon", url: "/giqlogo_dark.png", sizes: "32x32" },
-    { rel: "icon", url: "/giqlogo_dark.png", sizes: "16x16" },
+    { rel: "icon", url: "/favico.svg", sizes: "32x32" },
+    { rel: "icon", url: "/favico.svg", sizes: "16x16" },
   ],
 };
 

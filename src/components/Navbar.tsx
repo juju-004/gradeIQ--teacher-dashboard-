@@ -14,10 +14,19 @@ import { SidebarTrigger } from "./ui/sidebar";
 import { WorkspaceSelector } from "@/components/WorkSpaceSelector";
 import { useAuth } from "@/context/Auth";
 import FormClassSelector from "@/components/FormClassSelector";
+import { useEffect, useState } from "react";
 
 const Navbar = () => {
   const { setTheme } = useTheme();
   const { user } = useAuth();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
   return (
     <nav className="p-4 flex items-center justify-between sticky top-0 bg-background z-40">
       <div className="flex gap-3">
@@ -28,8 +37,10 @@ const Navbar = () => {
       </div>
 
       <div className="flex items-center gap-4">
-        {user?.roles.includes("form teacher") && <FormClassSelector />}
-        {user?.roles.includes("teacher") && <WorkspaceSelector />}
+        <div className="sm:flex hidden gap-5">
+          {user?.roles.includes("form teacher") && <FormClassSelector />}
+          {user?.roles.includes("teacher") && <WorkspaceSelector />}
+        </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="icon">

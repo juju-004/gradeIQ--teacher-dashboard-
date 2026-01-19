@@ -15,10 +15,7 @@
 @theme inline {
   --color-c1: var(--c1);
   --color-c2: var(--c2);
-  --color-c3: var(--c3);
   --color-c4: var(--c4);
-  --color-c5: var(--c5);
-  --color-c6: var(--c6);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -64,10 +61,7 @@
   --card: oklch(1 0 0);
   --c1: oklch(0.72 0.12 218);
   --c2: oklch(0.18 0.03 254);
-  --c3: oklch(0.75 0.14 210);
-  --c4: oklch(0.32 0.05 248);
-  --c5: oklch(0.78 0.14 182);
-  --c6: oklch(0.22 0.03 246);
+  --c4: oklch(0.92 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
@@ -100,6 +94,7 @@
 }
 
 .dark {
+  --c4: oklch(0.2 0 0);
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);

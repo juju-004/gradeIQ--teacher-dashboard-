@@ -60,7 +60,6 @@ export async function POST(req: NextRequest) {
   session.name = admin.name;
   session.email = admin.email;
   session.roles = admin.roles;
-  session.formClass = admin.formClass;
   session.schoolName = admin.school;
   await session.save();
 

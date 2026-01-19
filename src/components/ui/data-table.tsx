@@ -80,8 +80,8 @@ export function DataTable<TData, TValue>({
           </Button>
         </div>
       )}
-      <div className="border rounded-lg p-2 shadow-sm bg-white dark:bg-neutral-900">
-        <Table className="sm:!table-fixed ">
+      <div className="border rounded-lg p-2 bg-c4/70 dark:bg-neutral-900">
+        <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -92,7 +92,7 @@ export function DataTable<TData, TValue>({
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   );
@@ -114,13 +114,14 @@ export function DataTable<TData, TValue>({
                 table.getRowModel().rows.map((row) => (
                   <TableRow
                     key={row.id}
+                    className="even:bg-muted-foreground/10"
                     data-state={row.getIsSelected() && "selected"}
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
                         {flexRender(
                           cell.column.columnDef.cell,
-                          cell.getContext()
+                          cell.getContext(),
                         )}
                       </TableCell>
                     ))}

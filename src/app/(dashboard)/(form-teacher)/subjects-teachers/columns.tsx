@@ -11,7 +11,7 @@ type ColumnActions = {
 };
 
 export const subjectColumns = (
-  actions: ColumnActions
+  actions: ColumnActions,
 ): ColumnDef<SubjectWithTeachers>[] => [
   {
     id: "select",
@@ -44,6 +44,7 @@ export const subjectColumns = (
         </Button>
       );
     },
+    cell: ({ row }) => <span className="ml-3">{row.original.name}</span>,
   },
   {
     id: "teachers",

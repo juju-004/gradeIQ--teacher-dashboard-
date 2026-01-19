@@ -22,10 +22,10 @@ export function WorkspaceSelector() {
             if (ws) setWorkspace(ws);
           }}
         >
-          <SelectTrigger>
+          <SelectTrigger className="w-full">
             <SelectValue placeholder="Select Workspace" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="w-full">
             {workspaces.map((ws) => (
               <SelectItem key={ws.value} value={ws.value}>
                 {ws.value}

@@ -1,7 +1,7 @@
 "use client";
 
 import { PasswordCell } from "@/app/(dashboard)/(admin)/_components/PasswordCell";
-import { Staff } from "@/app/(dashboard)/(admin)/staff/page";
+import { Staff } from "@/app/(dashboard)/(admin)/staff/Staff";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnDef } from "@tanstack/react-table";

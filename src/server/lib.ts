@@ -6,7 +6,6 @@ export interface SessionData {
   name: string;
   email: string;
   roles: Array<"admin" | "teacher" | "form teacher">;
-  formClass?: string[];
   schoolId: string;
   schoolName?: string;
 }

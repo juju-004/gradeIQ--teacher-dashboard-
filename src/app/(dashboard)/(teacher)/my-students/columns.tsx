@@ -12,10 +12,6 @@ export type MyStudent = {
   assessmentCount: number;
 };
 
-type ColumnActions = {
-  onView: (student: MyStudent) => void;
-};
-
 export const myStudentsColumns: ColumnDef<MyStudent>[] = [
   // Student name
   {

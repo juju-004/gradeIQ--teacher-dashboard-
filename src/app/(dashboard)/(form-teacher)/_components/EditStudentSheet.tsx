@@ -38,7 +38,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { Student } from "@/app/(dashboard)/(form-teacher)/my-class/page";
+import { Student } from "@/app/(dashboard)/(form-teacher)/my-class/myClass";
 
 /* ---------------- SCHEMA ---------------- */
 
@@ -84,7 +84,7 @@ export default function EditStudentSheet({
     try {
       await axios.put(
         `/api/formteacher/${activeClass}/students?studentId=${student._id}`,
-        values
+        values,
       );
 
       toast.success("Student updated");

@@ -1,6 +1,6 @@
 "use client";
 
-import { Student } from "@/app/(dashboard)/(form-teacher)/my-class/page";
+import { Student } from "@/app/(dashboard)/(form-teacher)/my-class/myClass";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnDef } from "@tanstack/react-table";
@@ -11,7 +11,7 @@ type ColumnActions = {
 };
 
 export const studentColumns = (
-  actions: ColumnActions
+  actions: ColumnActions,
 ): ColumnDef<Student>[] => [
   {
     id: "select",
@@ -44,6 +44,7 @@ export const studentColumns = (
         </Button>
       );
     },
+    cell: ({ row }) => <span className="ml-3">{row.original.name}</span>,
   },
   {
     accessorKey: "sex",
@@ -58,6 +59,7 @@ export const studentColumns = (
         </Button>
       );
     },
+    cell: ({ row }) => <span className="ml-3">{row.original.sex}</span>,
   },
   {
     id: "actions",

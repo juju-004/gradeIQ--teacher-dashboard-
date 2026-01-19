@@ -44,7 +44,6 @@ export async function POST(req: NextRequest) {
   session.email = user.email;
   session.roles = user.roles;
   session.schoolId = user.schoolId;
-  session.formClass = user.formClass;
   session.schoolName = user.school;
   await session.save();
 

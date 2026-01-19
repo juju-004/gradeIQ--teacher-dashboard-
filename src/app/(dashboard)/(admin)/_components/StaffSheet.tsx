@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Staff } from "@/app/(dashboard)/(admin)/staff/page";
+import { Staff } from "@/app/(dashboard)/(admin)/staff/Staff";
 
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
