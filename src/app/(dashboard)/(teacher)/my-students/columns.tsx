@@ -66,26 +66,8 @@ export const myStudentsColumns: ColumnDef<MyStudent>[] = [
       return avg === null ? (
         <span className="text-muted-foreground italic ml-3">No scores</span>
       ) : (
-        <span className="font-medium ml-3">{avg}%</span>
+        <span className="font-medium ml-3 text-c1">{avg}%</span>
       );
     },
   },
-
-  // View action
-  // {
-  //   id: "actions",
-  //   cell: ({ row }) => {
-  //     const student = row.original;
-
-  //     return (
-  //       <Button
-  //         variant="ghost"
-  //         size="icon"
-  //         onClick={() => actions.onView(student)}
-  //       >
-  //         <Eye className="h-4 w-4" />
-  //       </Button>
-  //     );
-  //   },
-  // },
 ];

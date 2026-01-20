@@ -21,14 +21,14 @@ export async function GET(req: NextRequest) {
     if (!assessmentId) {
       return NextResponse.json(
         { message: "Invalid assessment ID" },
-        { status: 400 }
+        { status: 400 },
       );
     }
     // Validate ObjectId
     if (!mongoose.Types.ObjectId.isValid(assessmentId)) {
       return NextResponse.json(
         { message: "Invalid assessment ID" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
     if (!assessment) {
       return NextResponse.json(
         { message: "Assessment not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
     console.error(error);
     return NextResponse.json(
       { message: "Failed to fetch assessment and results" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -115,13 +115,61 @@ export async function POST(req: NextRequest) {
         message: "Assessment and results saved successfully",
         assessmentId: assessment._id,
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error(error);
     return NextResponse.json(
       { error: "Failed to save assessment" },
-      { status: 500 }
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const session = await getSession();
+    if (!session?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    await connectDB();
+
+    const { searchParams } = new URL(req.url);
+    const assessmentId = searchParams.get("assessmentId");
+
+    if (!assessmentId) {
+      return NextResponse.json(
+        { message: "Assessment ID is required" },
+        { status: 400 },
+      );
+    }
+
+    console.log(assessmentId);
+    console.log("yes 1");
+
+    if (!mongoose.Types.ObjectId.isValid(assessmentId)) {
+      return NextResponse.json(
+        { message: "Invalid assessment ID" },
+        { status: 400 },
+      );
+    }
+
+    console.log("yes 2");
+    // Delete student results first (important)
+    await StudentAssessmentResult.deleteMany({ assessmentId });
+    console.log("yes 3");
+
+    // Delete assessment
+    await Assessment.findByIdAndDelete(assessmentId);
+    console.log("yes 4");
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { message: "Failed to delete assessment" },
+      { status: 500 },
     );
   }
 }

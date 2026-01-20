@@ -20,7 +20,7 @@ export default function StudentsAverageTable() {
   );
 
   return (
-    <div className="sm:p-6 p-3">
+    <div className="sm:p-6 p-2">
       <div className="flex items-start sm:items-center sm:flex-row flex-col justify-between">
         <h1 className="text-2xl font-bold mb-6">My Students</h1>
       </div>

@@ -50,7 +50,7 @@ export default function UploadPage({
             file: null,
             previewUrl: null,
           },
-    [studentOMRMap, activeStudentId]
+    [studentOMRMap, activeStudentId],
   );
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -80,7 +80,7 @@ export default function UploadPage({
 
   function getSimplifiedStudentOMR(
     students: Student[] | null,
-    studentOMRMap: Record<string, StudentOMRState>
+    studentOMRMap: Record<string, StudentOMRState>,
   ): SimplifiedStudentOMR[] {
     if (!students) return [];
 
@@ -96,7 +96,7 @@ export default function UploadPage({
       return;
     }
     const { data } = await axios.get(
-      `/api/teacher/students?classId=${workspace?.classId}&subjectId=${workspace.subjectId}`
+      `/api/teacher/students?classId=${workspace?.classId}&subjectId=${workspace.subjectId}`,
     );
 
     const studs: Student[] = data.map((student: any) => ({
@@ -126,80 +126,75 @@ export default function UploadPage({
       />
 
       {/* Main content */}
-      <div className=" mx-auto">
-        {activeStudentId && (
-          <div>
-            {!activeStud.file ? (
-              <div className="fx flex-col py-24">
-                <UploadCloud className="mb-4 text-muted-foreground" size={32} />
-                <h3 className="font-semibold mb-1">Upload student script</h3>
-                <p className="text-sm text-muted-foreground text-center mb-4">
-                  Upload a clear image or photo of the student’s omr sheet
-                </p>
-                <label>
-                  <input
-                    ref={inputRef}
-                    type="file"
-                    accept="image/*"
-                    hidden
-                    onChange={handleFileChange}
-                  />
-                  <Button
-                    type="button"
-                    onClick={() => inputRef.current?.click()}
-                  >
-                    Choose file
-                  </Button>
-                </label>
-              </div>
-            ) : (
-              <div className="border w-full flex items-start gap-7">
-                <div className="max-w-xs border hidden md:flex relative rounded-md overflow-hidden">
-                  <img
-                    src={URL.createObjectURL(activeStud.file) || ""}
-                    alt="Preview"
-                    className="w-full h-auto object-contain rounded-md"
-                  />
-                  {!activeStud.answers && (
-                    <div className="absolute text-c1 gap-2 flex-col bg-black/75 inset-0 fx z-10">
-                      <div className="loader"></div>
-                      <span>Analyzing...</span>
-                    </div>
-                  )}
-                </div>
-                {activeStud.answers ? (
-                  <AnswerKeySelect
-                    setAnswers={(newAnswers) =>
-                      setStudentOMRMap((prev) => {
-                        const prevAnswers =
-                          prev[activeStudentId]?.answers ??
-                          Array(questionsCount).fill("-");
-                        const nextAnswers =
-                          typeof newAnswers === "function"
-                            ? newAnswers(prevAnswers) // call the function
-                            : newAnswers;
-
-                        return {
-                          ...prev,
-                          [activeStudentId]: {
-                            ...prev[activeStudentId]!,
-                            answers: nextAnswers,
-                          },
-                        };
-                      })
-                    }
-                    answers={activeStud.answers}
-                    optionCount={optionCount}
-                    numberOfQuestions={questionsCount}
-                  />
-                ) : (
-                  <AnswerKeySkeleton />
+      {activeStudentId && (
+        <div className="">
+          {!activeStud.file ? (
+            <div className="fx flex-col py-24">
+              <UploadCloud className="mb-4 text-muted-foreground" size={32} />
+              <h3 className="font-semibold mb-1">Upload student script</h3>
+              <p className="text-sm text-muted-foreground text-center mb-4">
+                Upload a clear image or photo of the student’s omr sheet
+              </p>
+              <label>
+                <input
+                  ref={inputRef}
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  onChange={handleFileChange}
+                />
+                <Button type="button" onClick={() => inputRef.current?.click()}>
+                  Choose file
+                </Button>
+              </label>
+            </div>
+          ) : (
+            <div className="border w-full justify-center flex flex-col items-center md:flex-row md:items-start gap-7">
+              <div className="max-w-xs w-4/5 border flex relative rounded-md overflow-hidden">
+                <img
+                  src={URL.createObjectURL(activeStud.file) || ""}
+                  alt="Preview"
+                  className={`w-full h-auto object-contain rounded-md ${activeStud.answers && "md:flex hidden"}`}
+                />
+                {!activeStud.answers && (
+                  <div className="absolute text-c1 gap-2 flex-col bg-black/75 inset-0 fx z-10">
+                    <div className="loader"></div>
+                    <span>Analyzing...</span>
+                  </div>
                 )}
               </div>
-            )}
-          </div>
-        )}
-      </div>
+              {activeStud.answers ? (
+                <AnswerKeySelect
+                  setAnswers={(newAnswers) =>
+                    setStudentOMRMap((prev) => {
+                      const prevAnswers =
+                        prev[activeStudentId]?.answers ??
+                        Array(questionsCount).fill("-");
+                      const nextAnswers =
+                        typeof newAnswers === "function"
+                          ? newAnswers(prevAnswers) // call the function
+                          : newAnswers;
+
+                      return {
+                        ...prev,
+                        [activeStudentId]: {
+                          ...prev[activeStudentId]!,
+                          answers: nextAnswers,
+                        },
+                      };
+                    })
+                  }
+                  answers={activeStud.answers}
+                  optionCount={optionCount}
+                  numberOfQuestions={questionsCount}
+                />
+              ) : (
+                <AnswerKeySkeleton className="!hidden md:!grid" />
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

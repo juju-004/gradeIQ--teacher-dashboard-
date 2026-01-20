@@ -17,6 +17,7 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -29,6 +30,7 @@ import { ForwardRefExoticComponent, RefAttributes, useState } from "react";
 import { usePathname } from "next/navigation";
 import FormClassSelector from "@/components/FormClassSelector";
 import { WorkspaceSelector } from "@/components/WorkSpaceSelector";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type MenuItem = {
   title: string;
@@ -63,6 +65,7 @@ const ASidebar = () => {
   const { user } = useAuth();
   const pathname = usePathname();
   const { toggleSidebar } = useSidebar();
+  const isMobile = useIsMobile();
 
   const [text, setText] = useState("Log Out");
 
@@ -113,15 +116,19 @@ const ASidebar = () => {
               {Object.entries(menuByRole).map(([role, items]) => (
                 <div key={role}>
                   {/* Role Label */}
-                  <div className="px-3 py-2 text-xs font-semibold uppercase text-muted-foreground">
-                    {role}
-                  </div>
+                  <SidebarGroupLabel>
+                    <div className="px-3 py-2 text-xs font-semibold uppercase text-muted-foreground">
+                      {role}
+                    </div>
+                  </SidebarGroupLabel>
 
                   {items.map((item) => (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton
                         asChild
-                        onClick={toggleSidebar}
+                        onClick={() => {
+                          isMobile && toggleSidebar();
+                        }}
                         className={`px-2 h-11 ${
                           item.url === pathname ? "bg-white/5" : ""
                         }`}
@@ -161,12 +168,15 @@ const ASidebar = () => {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <div className="absolute from-transparent to-c4 bg-gradient-to-b bottom-0 fx left-0 w-full">
-        <div className="sm:hidden bg-muted shadow px-3 py-3 mb-2 rounded-3xl w-[90%] flex gap-1 flex-col">
-          {user?.roles.includes("form teacher") && <FormClassSelector />}
-          {user?.roles.includes("teacher") && <WorkspaceSelector />}
+      {(user?.roles.includes("form teacher") ||
+        user?.roles.includes("teacher")) && (
+        <div className="absolute from-transparent to-c4 bg-gradient-to-b bottom-0 fx left-0 w-full">
+          <div className="sm:hidden bg-muted shadow px-3 py-3 mb-2 rounded-3xl w-[90%] flex gap-1 flex-col">
+            {user?.roles.includes("form teacher") && <FormClassSelector />}
+            {user?.roles.includes("teacher") && <WorkspaceSelector />}
+          </div>
         </div>
-      </div>
+      )}
     </Sidebar>
   );
 };
