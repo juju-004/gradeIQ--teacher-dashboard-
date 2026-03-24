@@ -4,11 +4,7 @@ import { Button } from "@/components/ui/button";
 import clsx from "clsx";
 import { useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-
-export type Student = {
-  id: string;
-  name: string;
-};
+import { Student } from "@/app/(dashboard)/(teacher)/_types/assessments.types";
 
 type Props = {
   students: Student[] | null;
@@ -85,7 +81,7 @@ export function StudentSwitcher({
           ref={containerRef}
           className={clsx(
             "flex gap-2 overflow-x-auto py-2 px-6 hide-scrollbar cursor-grab select-none",
-            isDragging && "cursor-grabbing"
+            isDragging && "cursor-grabbing",
           )}
           onMouseDown={onMouseDown}
           onMouseMove={onMouseMove}
@@ -106,7 +102,7 @@ export function StudentSwitcher({
                 onClick={() => onChange(student.id)}
                 className={clsx(
                   "px-4 whitespace-nowrap",
-                  isActive && "bg-c1 scale-105 hover:bg-c1/90 text-white"
+                  isActive && "bg-c1 scale-105 hover:bg-c1/90 text-white",
                 )}
               >
                 {student.name}

@@ -46,7 +46,6 @@ const roleTabs: Record<string, Array<MenuItem>> = {
   admin: [
     { title: "Manage Staff", url: "/", icon: Users },
     { title: "Manage Classes", url: "/classes", icon: Clipboard },
-    { title: "School Settings", url: "/settings", icon: Settings },
   ],
   formteacher: [
     { title: "My Class", url: "/my-class", icon: Users },
@@ -57,7 +56,6 @@ const roleTabs: Record<string, Array<MenuItem>> = {
     { title: "My Students", url: "/my-students", icon: Users },
     { title: "Upload & Mark", url: "/assessment", icon: FileCheck },
     { title: "Library", url: "/library", icon: BarChart3 },
-    { title: "Settings", url: "/settings", icon: Settings },
   ],
 };
 
@@ -92,10 +90,7 @@ const ASidebar = () => {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild className="h-auto py-1 px-2">
-                <Link
-                  href="/profile"
-                  className="flex items-center gap-3 font-semibold text-base"
-                >
+                <span className="flex items-center gap-3 font-semibold text-base">
                   <User2 size={25} className="text-c1" />
                   <span className="flex flex-col">
                     <span className="font-bold text-base">{user?.name}</span>
@@ -103,7 +98,7 @@ const ASidebar = () => {
                       {user?.roles.join(", ")}
                     </span>
                   </span>
-                </Link>
+                </span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
@@ -146,6 +141,28 @@ const ASidebar = () => {
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   ))}
+                  <SidebarMenuItem key={"settings"}>
+                    <SidebarMenuButton
+                      asChild
+                      onClick={() => {
+                        isMobile && toggleSidebar();
+                      }}
+                      className={`px-2 h-11 ${
+                        pathname === "/settings" ? "bg-white/5" : ""
+                      }`}
+                    >
+                      <Link
+                        className="flex items-center gap-3"
+                        href={"/settings"}
+                      >
+                        <Settings
+                          size={20}
+                          className={pathname === "/settings" ? "text-c1" : ""}
+                        />
+                        <span className="text-sm">Settings</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
                 </div>
               ))}
 
@@ -171,7 +188,7 @@ const ASidebar = () => {
       {(user?.roles.includes("form teacher") ||
         user?.roles.includes("teacher")) && (
         <div className="absolute from-transparent to-c4 bg-gradient-to-b bottom-0 fx left-0 w-full">
-          <div className="sm:hidden bg-muted shadow px-3 py-3 mb-2 rounded-3xl w-[90%] flex gap-1 flex-col">
+          <div className="sm:hidden bg-muted shadow px-3 py-3 mb-2 rounded-t-3xl w-[95%] flex gap-1 flex-col">
             {user?.roles.includes("form teacher") && <FormClassSelector />}
             {user?.roles.includes("teacher") && <WorkspaceSelector />}
           </div>

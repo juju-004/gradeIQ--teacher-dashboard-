@@ -2,112 +2,158 @@
 
 import { AnswerKeySelect } from "@/app/(dashboard)/(teacher)/_components/omr/AnswerKeySelect";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { UploadIcon } from "lucide-react";
-import { Dispatch, SetStateAction, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { AnswerOption } from "@/app/(dashboard)/(teacher)/_types/assessments.types";
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
+import { AnimatePresence } from "framer-motion";
+import {
+  AnswerOption,
+  Question,
+} from "@/app/(dashboard)/(teacher)/_types/assessments.types";
+import RubricBuilder from "@/app/(dashboard)/(teacher)/_components/RubricBuilder";
+import { toast } from "sonner";
+import Fadein from "@/components/ui/fadein";
+import { useAssessment } from "@/app/(dashboard)/(teacher)/_types/AssessmentProvider";
+import axios from "axios";
 
-export type MarkingSchemeType = "omr" | "handwritten";
-
-export default function Rubric({
-  value,
-  onChange,
-  questionsCount,
-  optionCount,
-}: {
+type RubricTextProps = {
+  value: Question[];
+  onChange: Dispatch<SetStateAction<Question[]>>;
+};
+type RubricOMRProps = {
   value: AnswerOption[];
-  onChange: Dispatch<SetStateAction<string[]>>;
-  questionsCount: number;
-  optionCount: number;
-}) {
-  const [schemeType, setSchemeType] =
-    useState<MarkingSchemeType>("handwritten");
-  const [manualOpen, setManualOpen] = useState(false);
+  onChange: Dispatch<SetStateAction<AnswerOption[]>>;
+};
+
+export default function Rubric() {
+  const {
+    assessmentType,
+    questionCount,
+    optionCount,
+    omrScheme,
+    textQuestions,
+    setOmrScheme,
+    setTextQuestions,
+  } = useAssessment();
+
+  const rubric: { omr: RubricOMRProps; text: RubricTextProps } = {
+    omr: { value: omrScheme, onChange: setOmrScheme },
+    text: { value: textQuestions, onChange: setTextQuestions },
+  };
+
+  const [file, setFile] = useState<File | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const uploadFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (assessmentType === "omr") return;
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile) return;
+
+    startTransition(async () => {
+      if (!selectedFile) return;
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+      formData.append("mode", "rubric");
+
+      try {
+        const { data } = await axios.post("/api/ocr", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        rubric["text"].onChange(data);
+
+        setFile(selectedFile);
+      } catch (err) {
+        console.error(err);
+        toast.error("Upload failed");
+      }
+    });
+  };
+
+  useEffect(() => {
+    if (assessmentType === "omr" && !rubric["omr"].value.length)
+      rubric["omr"].onChange(Array(questionCount).fill("-"));
+  }, [assessmentType]);
+
+  useEffect(() => {
+    setOmrScheme((prev) => {
+      const next = [...prev];
+
+      if (next.length < questionCount) {
+        next.push(...Array(questionCount - next.length).fill("-"));
+      } else {
+        next.length = questionCount;
+      }
+
+      return next;
+    });
+  }, [questionCount]);
 
   return (
-    <section className="space-y-4 max-w-xl">
+    <section className="space-y-4 mx-auto max-w-xl">
       <div className="space-y-4">
-        {/* Scheme Type Select */}
-        <div className="space-y-1">
-          <Label className="text-sm font-medium">Marking scheme format</Label>
-
-          <Select
-            value={schemeType}
-            onValueChange={(v) => setSchemeType(v as MarkingSchemeType)}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select scheme type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="omr">OMR sheet (shaded answers)</SelectItem>
-              <SelectItem value="handwritten">
-                Handwritten (1.A, 2.B, etc.)
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
         {/* File Upload */}
-        <div className="space-y-1">
-          <Label className="text-sm font-medium">Upload Image</Label>
-          <p className="text-xs text-muted-foreground">
-            Please upload a clear image of your marking scheme
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Supported formats: JPG, PNG. Max 5MB.
-          </p>
-          <Input type="file" accept="image/*" className="cursor-pointer" />
-        </div>
-
-        <Button className="bg-c1 text-white hover:bg-c1/90 cursor-pointer">
-          Upload
-          <UploadIcon className="ml-2 h-4 w-4" />
-        </Button>
-
-        {/* OR Divider */}
-        <div className="flex items-center my-4">
-          <div className="flex-grow border-t border-solid border-muted"></div>
-          <span className="mx-3 text-sm text-muted-foreground font-medium">
-            OR
-          </span>
-          <div className="flex-grow border-t border-solid border-muted"></div>
-        </div>
-
-        {/* Pick Answers Manually */}
-        <Button
-          variant={"secondary"}
-          onClick={() => setManualOpen((prev) => !prev)}
-        >
-          Pick answers manually
-        </Button>
-
+        {assessmentType === "text" ? (
+          <>
+            <div className="space-y-1 gap-3">
+              <Label className="text-lg font-semibold">
+                Upload Rubric Image
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                Please upload a clear image or images of the correct answers
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Supported formats: JPG, PNG, JPEG. Max 5MB.
+              </p>
+              <label className="mt-6">
+                <input
+                  ref={inputRef}
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  onChange={uploadFile}
+                />
+                <Button
+                  type="button"
+                  className="bg-c1 mt-6 text-white -translate-x-2 rounded-full hover:bg-c1/90 cursor-pointer"
+                  onClick={() => inputRef.current?.click()}
+                >
+                  {isPending
+                    ? "Analyzing..."
+                    : file
+                      ? "Add more files"
+                      : "Choose File"}
+                </Button>
+              </label>
+            </div>
+          </>
+        ) : rubric["omr"].value.length ? (
+          <Fadein key="answer-key" className="overflow-hidden mt-4">
+            <AnswerKeySelect
+              answers={rubric["omr"].value}
+              setAnswers={rubric["omr"].onChange}
+              optionCount={parseInt(optionCount)}
+              numberOfQuestions={questionCount}
+            />
+          </Fadein>
+        ) : (
+          <></>
+        )}
         {/* Animated AnswerKey Section */}
         <AnimatePresence>
-          {manualOpen && (
-            <motion.div
-              key="answer-key"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.4, ease: "easeInOut" }}
-              className="overflow-hidden mt-4"
-            >
-              <AnswerKeySelect
-                answers={value}
-                setAnswers={onChange}
-                optionCount={optionCount}
-                numberOfQuestions={questionsCount}
-              />
-            </motion.div>
+          {assessmentType === "text" && rubric["text"].value.length > 0 && (
+            <RubricBuilder
+              questions={rubric["text"].value}
+              setQuestions={rubric["text"].onChange}
+            />
           )}
         </AnimatePresence>
       </div>

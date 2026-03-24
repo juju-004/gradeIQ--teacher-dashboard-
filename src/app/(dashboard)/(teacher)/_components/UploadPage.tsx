@@ -1,63 +1,96 @@
 "use client";
 
-import {
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { Student, StudentSwitcher } from "./StudentSwitcher";
+import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { StudentSwitcher } from "./StudentSwitcher";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { useWorkspace } from "@/context/Workspace";
 import { toast } from "sonner";
 import { AnswerKeySelect } from "@/app/(dashboard)/(teacher)/_components/omr/AnswerKeySelect";
 import { UploadCloud } from "lucide-react";
-import { AnswerKeySkeleton } from "@/app/(dashboard)/(teacher)/_components/omr/AnswerKeySkeleton";
-import { SimplifiedStudentOMR } from "@/app/(dashboard)/(teacher)/assessment/page";
-import { AnswerOption } from "@/app/(dashboard)/(teacher)/_types/assessments.types";
+import {
+  AnswerOption,
+  AssessmentType,
+  Student,
+  studentAnswers,
+  StudentOMRState,
+} from "@/app/(dashboard)/(teacher)/_types/assessments.types";
+import GradingView from "@/app/(dashboard)/(teacher)/_components/GradingView";
+import { Card, CardContent } from "@/components/ui/card";
+import { useAssessment } from "@/app/(dashboard)/(teacher)/_types/AssessmentProvider";
 
-export type StudentOMRState = {
-  file: File | null;
-  answers?: AnswerOption[]; // extracted or manually entered
+const Display = ({
+  activeStud,
+  children,
+  assessmentType,
+}: {
+  activeStud: StudentOMRState;
+  children: ReactNode;
+  assessmentType?: AssessmentType;
+}) => {
+  return (
+    <div className="border w-full justify-center flex flex-col items-center md:flex-row md:items-start gap-7">
+      {assessmentType !== "omr" && (
+        <div className="max-w-xs w-4/5 border flex relative rounded-md overflow-hidden">
+          {activeStud.file && (
+            <img
+              src={URL.createObjectURL(activeStud.file) || ""}
+              alt="Preview"
+              className={`w-full h-auto object-contain rounded-md ${activeStud.answers && "md:flex hidden"}`}
+            />
+          )}
+          {!activeStud.answers && (
+            <div className="absolute text-c1 gap-2 flex-col bg-black/75 inset-0 fx z-10">
+              <div className="loader"></div>
+              <span>Analyzing...</span>
+            </div>
+          )}
+        </div>
+      )}
+      {children}
+    </div>
+  );
 };
 
-export default function UploadPage({
-  questionsCount,
-  optionCount,
-  setSimplifiedOMR,
-}: {
-  questionsCount: number;
-  optionCount: number;
-  setSimplifiedOMR: Dispatch<SetStateAction<SimplifiedStudentOMR[]>>;
-}) {
+export default function UploadPage() {
   const { workspace } = useWorkspace();
   const inputRef = useRef<HTMLInputElement>(null);
+  const {
+    assessmentType,
+    omrScheme,
+    optionCount,
+    textQuestions,
+    questionCount,
+    students,
+    studentOMRMap,
+    setStudents,
+    setStudentOMRMap,
+  } = useAssessment();
 
-  const [students, setStudents] = useState<Student[] | null>(null);
   const [activeStudentId, setActiveStudentId] = useState<string | null>(null);
-  const [studentOMRMap, setStudentOMRMap] = useState<
-    Record<string, StudentOMRState>
-  >({});
-
   const activeStud = useMemo(
     () =>
       activeStudentId && studentOMRMap[activeStudentId]
         ? studentOMRMap[activeStudentId]
         : {
             file: null,
-            previewUrl: null,
+            answers:
+              assessmentType === "omr"
+                ? Array(questionCount).fill("-")
+                : undefined,
           },
     [studentOMRMap, activeStudentId],
   );
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!activeStudentId) return;
 
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
+
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+    formData.append("mode", "student");
 
     setStudentOMRMap((prev) => ({
       ...prev,
@@ -67,54 +100,79 @@ export default function UploadPage({
       },
     }));
 
-    setTimeout(() => {
+    try {
+      const { data } = await axios.post("/api/ocr", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
       setStudentOMRMap((prev) => ({
         ...prev,
         [activeStudentId]: {
           ...prev[activeStudentId],
-          answers: Array(questionsCount).fill("-"),
+          answers: data,
         },
       }));
-    }, 7000);
+    } catch (err) {
+      console.error(err);
+      toast.error("Upload failed");
+    }
   };
 
-  function getSimplifiedStudentOMR(
-    students: Student[] | null,
-    studentOMRMap: Record<string, StudentOMRState>,
-  ): SimplifiedStudentOMR[] {
-    if (!students) return [];
+  // function getSimplifiedStudentOMR(
+  //   students: Student[] | null,
+  //   studentOMRMap: Record<string, StudentOMRState>,
+  // ): SimplifiedStudentOMR[] {
+  //   if (!students) return [];
 
-    return students.map((student) => ({
-      id: student.id,
-      answers: studentOMRMap[student.id]?.answers,
-    }));
+  //   return students.map((student) => ({
+  //     id: student.id,
+  //     answers: studentOMRMap[student.id]?.answers,
+  //   }));
+  // }
+
+  function calculateOMRScore(
+    studentAnswers: AnswerOption[],
+    rubric: AnswerOption[],
+  ) {
+    let score = 0;
+
+    for (let i = 0; i < rubric.length; i++) {
+      if (studentAnswers[i] === rubric[i]) {
+        score++;
+      }
+    }
+
+    return score;
   }
 
-  const getStudents = async () => {
-    if (!workspace) {
-      toast.error("Cannot get class and subject");
+  useEffect(() => {
+    if (students?.length) {
+      setActiveStudentId(students[0].id);
       return;
     }
-    const { data } = await axios.get(
-      `/api/teacher/students?classId=${workspace?.classId}&subjectId=${workspace.subjectId}`,
-    );
 
-    const studs: Student[] = data.map((student: any) => ({
-      id: student._id,
-      name: student.name,
-    }));
+    const getStudents = async () => {
+      if (!workspace) {
+        toast.error("Cannot get class and subject");
+        return;
+      }
+      const { data } = await axios.get(
+        `/api/teacher/students?classId=${workspace?.classId}&subjectId=${workspace.subjectId}`,
+      );
 
-    setStudents(studs);
-    setActiveStudentId(studs[0].id);
-  };
+      const studs: Student[] = data.map((student: any) => ({
+        id: student._id,
+        name: student.name,
+      }));
 
-  useEffect(() => {
+      setStudents(studs);
+      setActiveStudentId(studs[0].id);
+    };
+
     getStudents();
   }, []);
-
-  useEffect(() => {
-    setSimplifiedOMR(getSimplifiedStudentOMR(students, studentOMRMap));
-  }, [students, studentOMRMap]);
 
   return (
     <div className="space-y-6 flex flex-col">
@@ -128,12 +186,54 @@ export default function UploadPage({
       {/* Main content */}
       {activeStudentId && (
         <div className="">
-          {!activeStud.file ? (
+          {assessmentType === "omr" ? (
+            <Display assessmentType="omr" activeStud={activeStud}>
+              <div className="flex flex-col gap-5">
+                <AnswerKeySelect
+                  setAnswers={(newAnswers) =>
+                    setStudentOMRMap((prev) => {
+                      const prevAnswers =
+                        prev[activeStudentId]?.answers ??
+                        Array(questionCount).fill("-");
+                      const nextAnswers =
+                        typeof newAnswers === "function"
+                          ? newAnswers(prevAnswers) // call the function
+                          : newAnswers;
+
+                      return {
+                        ...prev,
+                        [activeStudentId]: {
+                          ...prev[activeStudentId]!,
+                          answers: nextAnswers,
+                        },
+                      };
+                    })
+                  }
+                  answers={activeStud.answers as AnswerOption[]}
+                  gradingRubric={omrScheme}
+                  optionCount={parseInt(optionCount)}
+                  numberOfQuestions={questionCount}
+                />
+                <Card className="border-2 border-primary">
+                  <CardContent className="px-6 flex justify-between items-center">
+                    <span className="text-base font-semibold">Total Score</span>
+                    <span className="text-lg font-bold">
+                      {calculateOMRScore(
+                        activeStud.answers as AnswerOption[],
+                        omrScheme,
+                      )}
+                      /{questionCount}
+                    </span>
+                  </CardContent>
+                </Card>
+              </div>
+            </Display>
+          ) : !activeStud.file ? (
             <div className="fx flex-col py-24">
               <UploadCloud className="mb-4 text-muted-foreground" size={32} />
               <h3 className="font-semibold mb-1">Upload student script</h3>
               <p className="text-sm text-muted-foreground text-center mb-4">
-                Upload a clear image or photo of the student’s omr sheet
+                Upload a clear image or photo of the student’s answer sheet
               </p>
               <label>
                 <input
@@ -149,49 +249,14 @@ export default function UploadPage({
               </label>
             </div>
           ) : (
-            <div className="border w-full justify-center flex flex-col items-center md:flex-row md:items-start gap-7">
-              <div className="max-w-xs w-4/5 border flex relative rounded-md overflow-hidden">
-                <img
-                  src={URL.createObjectURL(activeStud.file) || ""}
-                  alt="Preview"
-                  className={`w-full h-auto object-contain rounded-md ${activeStud.answers && "md:flex hidden"}`}
-                />
-                {!activeStud.answers && (
-                  <div className="absolute text-c1 gap-2 flex-col bg-black/75 inset-0 fx z-10">
-                    <div className="loader"></div>
-                    <span>Analyzing...</span>
-                  </div>
-                )}
-              </div>
-              {activeStud.answers ? (
-                <AnswerKeySelect
-                  setAnswers={(newAnswers) =>
-                    setStudentOMRMap((prev) => {
-                      const prevAnswers =
-                        prev[activeStudentId]?.answers ??
-                        Array(questionsCount).fill("-");
-                      const nextAnswers =
-                        typeof newAnswers === "function"
-                          ? newAnswers(prevAnswers) // call the function
-                          : newAnswers;
-
-                      return {
-                        ...prev,
-                        [activeStudentId]: {
-                          ...prev[activeStudentId]!,
-                          answers: nextAnswers,
-                        },
-                      };
-                    })
-                  }
-                  answers={activeStud.answers}
-                  optionCount={optionCount}
-                  numberOfQuestions={questionsCount}
-                />
-              ) : (
-                <AnswerKeySkeleton className="!hidden md:!grid" />
+            <Display activeStud={activeStud}>
+              {activeStud.answers && (
+                <GradingView
+                  rubric={textQuestions}
+                  initialStudentAnswers={activeStud.answers as studentAnswers[]}
+                ></GradingView>
               )}
-            </div>
+            </Display>
           )}
         </div>
       )}

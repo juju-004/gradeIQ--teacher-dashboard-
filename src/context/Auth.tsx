@@ -15,7 +15,7 @@ export interface User {
   name: string;
   email: string;
   roles: Array<"admin" | "teacher" | "form teacher">;
-  school?: string; // optional, if you store school name or id
+  school?: string;
 }
 
 interface AuthContextType {

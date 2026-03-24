@@ -111,7 +111,7 @@ export default function ResultSheet({
                           className="rounded-xl border p-2 flex items-center justify-between"
                         >
                           <div className="space-y-1">
-                            <p className="text-sm font-medium text-white">
+                            <p className="text-sm font-medium">
                               Question {idx + 1}
                             </p>
 
@@ -159,8 +159,8 @@ export default function ResultSheet({
                             studentAnswer === "-"
                               ? "text-muted-foreground"
                               : isCorrect
-                              ? "border-green-500 text-green-600"
-                              : "border-red-500 text-red-600"
+                                ? "border-green-500 text-green-600"
+                                : "border-red-500 text-red-600"
                           }`}
                           title={`Q${
                             idx + 1
