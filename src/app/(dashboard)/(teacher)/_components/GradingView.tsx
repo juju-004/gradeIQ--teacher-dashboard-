@@ -12,6 +12,7 @@ import {
   gradeSingleQuestion,
 } from "@/app/(dashboard)/(teacher)/_grading/grade";
 import { Card, CardContent } from "@/components/ui/card";
+import { CheckCircle2, XCircle } from "lucide-react";
 
 interface Props {
   rubric: Question[];
@@ -111,6 +112,63 @@ export default function GradingView({ rubric, initialStudentAnswers }: Props) {
     });
   };
 
+  const toggleListAnswer = (
+    qNumber: number,
+    index: number,
+    maxScore: number,
+  ) => {
+    setResults((prev) =>
+      prev.map((r) => {
+        if (r.questionNumber !== qNumber) return r;
+
+        const detail = r.details?.[index];
+        if (!detail) return r;
+
+        const wasCorrect = detail.correct ?? detail.matched ?? false;
+
+        // score attached to this rubric answer
+        const rubricQuestion = rubric.find((q) => q.questionNumber === qNumber);
+        const answerScore = rubricQuestion?.answers[index]?.score || 0;
+
+        const delta = wasCorrect ? -answerScore : answerScore;
+
+        const newScore = Math.min(
+          maxScore,
+          Math.max(0, (r.score || 0) + delta),
+        );
+
+        const newDetails = [...r.details];
+
+        newDetails[index] = {
+          ...detail,
+          correct: !wasCorrect,
+          manuallyAdjusted: true,
+        };
+
+        return {
+          ...r,
+          score: Number(newScore.toFixed(2)),
+          details: newDetails,
+          manuallyAdjusted: true,
+        };
+      }),
+    );
+
+    setTotalScore((prevTotal) => {
+      const old = resultMap.get(qNumber);
+      const rubricQuestion = rubric.find((q) => q.questionNumber === qNumber);
+
+      const answerScore = rubricQuestion?.answers[index]?.score || 0;
+
+      const detail = old?.details?.[index];
+      const wasCorrect = detail?.correct ?? detail?.matched ?? false;
+
+      const delta = wasCorrect ? -answerScore : answerScore;
+
+      return prevTotal + delta;
+    });
+  };
+
   const buttons = [
     { value: "-1" },
     { text: "+½", value: "0.5" },
@@ -164,10 +222,10 @@ export default function GradingView({ rubric, initialStudentAnswers }: Props) {
             <div className="space-y-2">
               {student?.answers.map((ans, i) => {
                 const detail = result?.details?.[i];
-                const isCorrect = detail?.correct || detail?.matched;
+                const isCorrect = detail?.correct ?? detail?.matched;
 
                 return (
-                  <div key={i} className="space-y-1">
+                  <div key={i} className="flex items-center gap-2">
                     <Input
                       value={ans}
                       onChange={(e) =>
@@ -183,16 +241,21 @@ export default function GradingView({ rubric, initialStudentAnswers }: Props) {
                       )}
                     />
 
-                    {/* feedback */}
-                    {ans && (
-                      <span
-                        className={cn(
-                          "text-xs",
-                          isCorrect ? "text-green-600" : "text-red-600",
-                        )}
+                    {/* toggle icon ONLY for list */}
+                    {q.type === "list" && ans && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          toggleListAnswer(q.questionNumber, i, maxScore)
+                        }
+                        className="active:scale-75 transition"
                       >
-                        {isCorrect ? "Correct" : "Incorrect"}
-                      </span>
+                        {isCorrect ? (
+                          <CheckCircle2 className="text-green-600 w-5 h-5" />
+                        ) : (
+                          <XCircle className="text-red-500 w-5 h-5" />
+                        )}
+                      </button>
                     )}
                   </div>
                 );
