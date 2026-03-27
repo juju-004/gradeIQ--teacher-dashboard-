@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeftCircleIcon, ArrowRightCircleIcon } from "lucide-react";
 import { useAssessment } from "@/app/(dashboard)/(teacher)/_types/AssessmentProvider";
 import { toast } from "sonner";
+import { useWorkspace } from "@/context/Workspace";
+import { loadingService } from "@/services/loading";
+import axios from "axios";
 
 export type Step = {
   title: string;
@@ -20,6 +23,7 @@ type StepsProps = {
 export default function Steps({ steps, grade }: StepsProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const { assessmentName, assessmentType, textQuestions } = useAssessment();
+  const { workspace } = useWorkspace();
 
   const progress = ((currentStep + 1) / steps.length) * 100;
 
@@ -45,6 +49,33 @@ export default function Steps({ steps, grade }: StepsProps) {
 
     return true;
   };
+
+  //  const saveAssessment = async () => {
+  //     if (!workspace) {
+  //       toast.error("No workspace");
+  //       return;
+  //     }
+  //     loadingService.show();
+
+  //     try {
+  //       const { data } = await axios.post("/api/teacher/assessments", {
+  //         name: assessmentName,
+  //         classId: workspace?.classId,
+  //         subjectId: workspace?.subjectId,
+  //         answerKey: markingScheme,
+  //         students: simplifiedOMR,
+  //       });
+
+  //       console.log(data);
+
+  //       loadingService.hide();
+  //       toast.success(data.message);
+  //       push(`/assessment/${data.assessmentId}`);
+  //     } catch (error) {
+  //       loadingService.hide();
+  //       toast.error(filterError(error));
+  //     }
+  //   };
 
   const next = () => {
     const isValid = checkValidity(currentStep);

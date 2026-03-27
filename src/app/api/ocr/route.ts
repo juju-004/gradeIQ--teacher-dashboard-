@@ -2,11 +2,21 @@ import { parseOCRToQuestions, parseOCRToStudentAnswers } from "@/server/lib";
 import axios from "axios";
 import { NextRequest, NextResponse } from "next/server";
 
+type RubricMeta = {
+  questionNumber: number;
+  type?: "list" | "keyword";
+};
+
 export async function POST(req: NextRequest) {
   try {
     const form = await req.formData();
     const file = form.get("file") as File;
     const mode = form.get("mode") as string;
+    const rubricMetaJSON = form.get("rubricMeta") as string;
+
+    const rubricMeta: RubricMeta[] = rubricMetaJSON
+      ? JSON.parse(rubricMetaJSON)
+      : [];
 
     if (!file) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
@@ -36,7 +46,9 @@ export async function POST(req: NextRequest) {
     let parsed;
 
     if (mode === "rubric") parsed = parseOCRToQuestions(rawText);
-    else parsed = parseOCRToStudentAnswers(rawText);
+    else parsed = parseOCRToStudentAnswers(rawText, rubricMeta);
+
+    console.log(parsed);
 
     return NextResponse.json(parsed);
   } catch (error) {

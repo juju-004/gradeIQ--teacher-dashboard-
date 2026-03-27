@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
-import { StudentSwitcher } from "./StudentSwitcher";
+import { StudentSwitcher } from "../StudentSwitcher";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { useWorkspace } from "@/context/Workspace";
@@ -81,6 +81,10 @@ export default function UploadPage() {
           },
     [studentOMRMap, activeStudentId],
   );
+  const rubricMeta = textQuestions.map((q) => ({
+    questionNumber: q.questionNumber,
+    type: q.type,
+  }));
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!activeStudentId) return;
@@ -91,6 +95,7 @@ export default function UploadPage() {
     const formData = new FormData();
     formData.append("file", selectedFile);
     formData.append("mode", "student");
+    formData.append("rubricMeta", JSON.stringify(rubricMeta));
 
     setStudentOMRMap((prev) => ({
       ...prev,
@@ -106,6 +111,8 @@ export default function UploadPage() {
           "Content-Type": "multipart/form-data",
         },
       });
+
+      console.log(data);
 
       setStudentOMRMap((prev) => ({
         ...prev,
@@ -253,8 +260,8 @@ export default function UploadPage() {
               {activeStud.answers && (
                 <GradingView
                   rubric={textQuestions}
-                  initialStudentAnswers={activeStud.answers as studentAnswers[]}
-                ></GradingView>
+                  activeStudentId={activeStudentId}
+                />
               )}
             </Display>
           )}

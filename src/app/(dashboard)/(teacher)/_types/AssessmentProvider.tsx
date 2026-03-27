@@ -74,6 +74,9 @@ export function AssessmentProvider({ children }: { children: ReactNode }) {
   const [studentOMRMap, setStudentOMRMap] = useState<
     Record<string, StudentOMRState>
   >({});
+  const [mainResults, setMainResults] = useState<
+    Record<string, StudentOMRState>
+  >({});
 
   return (
     <AssessmentContext.Provider

@@ -68,7 +68,28 @@ export default function Rubric() {
             "Content-Type": "multipart/form-data",
           },
         });
+
         rubric["text"].onChange(data);
+        // rubric["text"].onChange([
+        //   {
+        //     questionNumber: 1,
+        //     answers: [
+        //       { text: "chrolophyll", score: 2 },
+        //       { text: "sunlight", score: 1 },
+        //       { text: "oxygen", score: 1 },
+        //     ],
+        //     type: "keyword",
+        //   },
+        //   {
+        //     questionNumber: 2,
+        //     answers: [
+        //       { text: "Rome", score: 2 },
+        //       { text: "London", score: 1 },
+        //       { text: "Berlin", score: 1 },
+        //     ],
+        //     type: "list",
+        //   },
+        // ]);
 
         setFile(selectedFile);
       } catch (err) {
