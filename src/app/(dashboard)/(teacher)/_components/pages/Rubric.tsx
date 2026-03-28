@@ -55,9 +55,12 @@ export default function Rubric() {
     if (assessmentType === "omr") return;
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
+    if (selectedFile.size > 4_000_000) {
+      toast.error("File too large. Max 4MB");
+      return;
+    }
 
     startTransition(async () => {
-      if (!selectedFile) return;
       const formData = new FormData();
       formData.append("file", selectedFile);
       formData.append("mode", "rubric");

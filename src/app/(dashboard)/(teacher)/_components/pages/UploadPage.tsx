@@ -105,6 +105,10 @@ export default function UploadPage() {
       },
     }));
 
+    if (selectedFile.size > 4_000_000) {
+      toast.error("File too large. Max 4MB");
+      return;
+    }
     try {
       const { data } = await axios.post("/api/ocr", formData, {
         headers: {
@@ -253,7 +257,6 @@ export default function UploadPage() {
             </div>
           ) : (
             <Display activeStud={activeStud}>
-              <></>
               {activeStud.answers && (
                 <GradingView
                   rubric={textQuestions}
