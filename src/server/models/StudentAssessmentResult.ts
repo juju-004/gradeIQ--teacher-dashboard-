@@ -16,16 +16,14 @@ const StudentAssessmentResultSchema = new Schema(
       index: true,
     },
 
-    answers: { type: [String], required: true },
-    score: { type: Number, required: true },
-    percentage: { type: Number, required: true },
+    answers: { type: Array, required: true },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 StudentAssessmentResultSchema.index(
   { assessmentId: 1, studentId: 1 },
-  { unique: true }
+  { unique: true },
 );
 
 // ✅ Export the model

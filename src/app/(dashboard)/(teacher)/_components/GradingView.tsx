@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -35,8 +35,8 @@ interface Props {
 }
 
 export default function GradingView({ rubric, activeStudentId }: Props) {
-  const { studentOMRMap, setStudentOMRMap } = useAssessment();
-  const [results, setResults] = useState<any[]>([]);
+  const { studentOMRMap, results, setResults, setStudentOMRMap } =
+    useAssessment();
 
   const studentAnswers = useMemo(
     () =>
@@ -46,7 +46,10 @@ export default function GradingView({ rubric, activeStudentId }: Props) {
     [studentOMRMap, activeStudentId],
   );
   const resultMap = useMemo(
-    () => new Map(results.map((r) => [r.questionNumber, r])),
+    () =>
+      new Map(
+        (results[activeStudentId] ?? []).map((r) => [r.questionNumber, r]),
+      ),
     [results],
   );
   const rubricMap = useMemo(
@@ -72,26 +75,36 @@ export default function GradingView({ rubric, activeStudentId }: Props) {
   }, 0);
 
   useEffect(() => {
+    if ((results[activeStudentId] ?? []).length) return;
     (async () => {
       const graded = await gradeAllQuestions(rubric, studentAnswers);
-      setResults(graded.results);
+      setResults((prev) => ({
+        ...prev,
+        [activeStudentId]: graded.results,
+      }));
     })();
   }, []);
 
   const debouncedGrade = useDebouncedCallback(
-    async (qNumber: number, updatedAnswers: studentAnswers[]) => {
+    async (qNumber: number, updatedAnswers: studentAnswers[], f?: any[]) => {
       const updated = await gradeSingleQuestion(
         qNumber,
         rubric,
         updatedAnswers,
       );
 
-      setResults((prev) =>
-        prev.map((r) => (r.questionNumber === qNumber ? updated : r)),
-      );
+      setResults((prev) => ({
+        ...prev,
+        [activeStudentId]: f
+          ? [...f, updated]
+          : prev[activeStudentId].map((r) =>
+              r.questionNumber === qNumber ? updated : r,
+            ),
+      }));
     },
     1000, // delay in ms
   );
+
   const setStudentAnswers = (answers: studentAnswers[]) => {
     setStudentOMRMap((prev) => ({
       ...prev,
@@ -101,6 +114,16 @@ export default function GradingView({ rubric, activeStudentId }: Props) {
       },
     }));
   };
+
+  const reGrade = async (
+    updatedAnswers: studentAnswers[],
+    qNumber: number,
+    f?: any[],
+  ) => {
+    setStudentAnswers(updatedAnswers);
+    debouncedGrade(qNumber, updatedAnswers, f);
+  };
+
   const updateAnswer = async (
     qNumber: number,
     index: number,
@@ -115,8 +138,7 @@ export default function GradingView({ rubric, activeStudentId }: Props) {
         : q,
     );
 
-    setStudentAnswers(updatedAnswers);
-    debouncedGrade(qNumber, updatedAnswers);
+    reGrade(updatedAnswers, qNumber);
   };
 
   const updateQuestionNumber = async (oldNumber: number, newNumber: number) => {
@@ -126,21 +148,14 @@ export default function GradingView({ rubric, activeStudentId }: Props) {
       q.questionNumber === oldNumber ? { ...q, questionNumber: newNumber } : q,
     );
 
-    setStudentAnswers(updatedAnswers);
-
-    const updated = await gradeSingleQuestion(
-      newNumber,
-      rubric,
-      updatedAnswers,
+    const filtered = (results[activeStudentId] ?? []).filter(
+      (r) => r.questionNumber !== oldNumber,
     );
 
-    setResults((prev) => {
-      const filtered = prev.filter((r) => r.questionNumber !== oldNumber);
-      return [...filtered, updated];
-    });
+    reGrade(updatedAnswers, newNumber, filtered);
   };
 
-  const deleteAnswer = async (qNumber: number, index: number) => {
+  const deleteAnswer = (qNumber: number, index: number) => {
     const updatedAnswers = studentAnswers.map((q) =>
       q.questionNumber === qNumber
         ? {
@@ -150,13 +165,7 @@ export default function GradingView({ rubric, activeStudentId }: Props) {
         : q,
     );
 
-    setStudentAnswers(updatedAnswers);
-
-    const updated = await gradeSingleQuestion(qNumber, rubric, updatedAnswers);
-
-    setResults((prev) =>
-      prev.map((r) => (r.questionNumber === qNumber ? updated : r)),
-    );
+    reGrade(updatedAnswers, qNumber);
   };
 
   const addAnswer = (qNumber: number) => {
@@ -173,8 +182,9 @@ export default function GradingView({ rubric, activeStudentId }: Props) {
   };
 
   const adjustScore = (qNumber: number, delta: number, maxScore: number) => {
-    setResults((prev) =>
-      prev.map((r) => {
+    setResults((prev) => ({
+      ...prev,
+      [activeStudentId]: prev[activeStudentId].map((r) => {
         if (r.questionNumber !== qNumber) return r;
 
         const newScore = Math.min(
@@ -185,10 +195,9 @@ export default function GradingView({ rubric, activeStudentId }: Props) {
         return {
           ...r,
           score: Number(newScore.toFixed(2)),
-          manuallyAdjusted: true,
         };
       }),
-    );
+    }));
   };
 
   const toggleListAnswer = (
@@ -196,8 +205,9 @@ export default function GradingView({ rubric, activeStudentId }: Props) {
     index: number,
     maxScore: number,
   ) => {
-    setResults((prev) =>
-      prev.map((r) => {
+    setResults((prev) => ({
+      ...prev,
+      [activeStudentId]: prev[activeStudentId].map((r) => {
         if (r.questionNumber !== qNumber) return r;
 
         const detail = r.details?.[index];
@@ -217,12 +227,7 @@ export default function GradingView({ rubric, activeStudentId }: Props) {
         );
 
         const newDetails = [...r.details];
-
-        newDetails[index] = {
-          ...detail,
-          correct: !wasCorrect,
-          manuallyAdjusted: true,
-        };
+        newDetails[index] = { ...detail, correct: !wasCorrect };
 
         return {
           ...r,
@@ -230,7 +235,7 @@ export default function GradingView({ rubric, activeStudentId }: Props) {
           details: newDetails,
         };
       }),
-    );
+    }));
   };
 
   const addQuestionBlock = () => {
@@ -261,7 +266,12 @@ export default function GradingView({ rubric, activeStudentId }: Props) {
 
     setStudentAnswers(updatedAnswers);
 
-    setResults((prev) => prev.filter((r) => r.questionNumber !== qNumber));
+    setResults((prev) => ({
+      ...prev,
+      [activeStudentId]: prev[activeStudentId].filter(
+        (r) => r.questionNumber !== qNumber,
+      ),
+    }));
   };
 
   const buttons = [
@@ -308,7 +318,7 @@ export default function GradingView({ rubric, activeStudentId }: Props) {
                       updateQuestionNumber(qNumber, Number(v))
                     }
                   >
-                    <SelectTrigger className="w-24 h-8 text-sm">
+                    <SelectTrigger className=" h-8 text-sm">
                       <SelectValue />
                     </SelectTrigger>
 

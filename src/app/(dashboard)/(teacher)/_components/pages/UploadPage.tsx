@@ -106,13 +106,24 @@ export default function UploadPage() {
     }));
 
     try {
-      const { data } = await axios.post("/api/ocr", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      // const { data } = await axios.post("/api/ocr", formData, {
+      //   headers: {
+      //     "Content-Type": "multipart/form-data",
+      //   },
+      // });
 
-      console.log(data);
+      // console.log(data);
+
+      const data = [
+        {
+          questionNumber: 1,
+          answers: ["Plants use sunlight to produce chlorophyll"],
+        },
+        {
+          questionNumber: 2,
+          answers: ["Rome", "London", "Las Vegas"],
+        },
+      ];
 
       setStudentOMRMap((prev) => ({
         ...prev,
@@ -126,18 +137,6 @@ export default function UploadPage() {
       toast.error("Upload failed");
     }
   };
-
-  // function getSimplifiedStudentOMR(
-  //   students: Student[] | null,
-  //   studentOMRMap: Record<string, StudentOMRState>,
-  // ): SimplifiedStudentOMR[] {
-  //   if (!students) return [];
-
-  //   return students.map((student) => ({
-  //     id: student.id,
-  //     answers: studentOMRMap[student.id]?.answers,
-  //   }));
-  // }
 
   function calculateOMRScore(
     studentAnswers: AnswerOption[],
@@ -257,6 +256,7 @@ export default function UploadPage() {
             </div>
           ) : (
             <Display activeStud={activeStud}>
+              <></>
               {activeStud.answers && (
                 <GradingView
                   rubric={textQuestions}

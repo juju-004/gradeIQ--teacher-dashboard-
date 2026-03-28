@@ -3,12 +3,13 @@ import { Schema, model, models } from "mongoose";
 
 const AssessmentSchema = new Schema(
   {
+    name: { type: String, required: true, trim: true },
+    type: { type: String, required: true },
     schoolId: {
       type: String,
       required: true,
       index: true,
     },
-    name: { type: String, required: true, trim: true },
     classId: {
       type: Schema.Types.ObjectId,
       ref: "ClassList",
@@ -21,9 +22,9 @@ const AssessmentSchema = new Schema(
       required: true,
       index: true,
     },
-    answerKey: { type: [String], required: true },
+    rubric: { type: Array, required: true },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export default models.Assessment || model("Assessment", AssessmentSchema);

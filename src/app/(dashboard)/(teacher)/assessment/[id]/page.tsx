@@ -9,15 +9,30 @@ import {
   Results,
   resultsColumns,
 } from "@/app/(dashboard)/(teacher)/assessment/[id]/columns";
-import { AnswerOption } from "@/app/(dashboard)/(teacher)/_types/assessments.types";
+import {
+  Answer,
+  AnswerOption,
+  Question,
+} from "@/app/(dashboard)/(teacher)/_types/assessments.types";
 import { Skeleton } from "@/components/ui/skeleton";
 import ResultSheet from "@/app/(dashboard)/(teacher)/assessment/[id]/result-sheet";
+import {
+  gradeOMR,
+  gradeText,
+} from "@/app/(dashboard)/(teacher)/_grading/gradeOMR";
+
+export type Result = {
+  _id: string;
+  studentId: { name: string };
+  answers: string[] | Answer[];
+};
 
 export interface AssessmentResultsResponse {
   _id: string;
   name: string;
-  answerKey: AnswerOption[];
-  results: Results[];
+  type: "omr" | "text";
+  rubric: AnswerOption[] | Question[];
+  results: Result[];
 }
 
 export default function ResultsTable() {
@@ -26,8 +41,46 @@ export default function ResultsTable() {
 
   const { data, isLoading } = useSWR<AssessmentResultsResponse>(
     `/api/teacher/assessments?assessmentId=${assessmentId}`,
-    fetcher
+    fetcher,
   );
+
+  console.log(data);
+
+  const tableData = useMemo(() => {
+    if (!data) return [];
+
+    // ---------- OMR ----------
+    if (data.type === "omr") {
+      const rubric = data.rubric as string[];
+
+      return data.results.map((student) => {
+        const graded = gradeOMR(rubric, student.answers as string[]);
+
+        return {
+          name: student.studentId.name,
+          score: graded.score.toString(),
+          totalScore: graded.total.toString(),
+          percentage: graded.percentage.toFixed(0),
+          answers: student.answers,
+        };
+      });
+    }
+
+    // ---------- TEXT ----------
+    const rubric = data.rubric as Question[];
+
+    return data.results.map((student) => {
+      const graded = gradeText(rubric, student.answers as Answer[]);
+
+      return {
+        name: student.studentId.name,
+        score: graded.score.toString(),
+        totalScore: graded.total.toString(),
+        percentage: graded.percentage.toFixed(0),
+        answers: student.answers,
+      };
+    });
+  }, [data]);
 
   const [open, setOpen] = useState(false);
   const [activeSheet, setActiveSheet] = useState<Results | null>(null);
@@ -39,7 +92,7 @@ export default function ResultsTable() {
           setOpen(true);
         },
       }),
-    []
+    [],
   );
 
   return (
@@ -55,16 +108,16 @@ export default function ResultsTable() {
         </h1>
       </div>
 
-      <DataTable
-        columns={columns}
-        data={data?.results ?? []}
-        isLoading={isLoading}
-      />
+      <DataTable columns={columns} data={tableData} isLoading={isLoading} />
 
       {data?.results && activeSheet && (
         <ResultSheet
-          markingScheme={data.answerKey}
-          studentName={activeSheet.studentId.name}
+          name={activeSheet.name}
+          rubric={data.rubric}
+          type={data.type}
+          percentage={activeSheet.percentage}
+          score={activeSheet.score}
+          totalScore={activeSheet.totalScore}
           answers={activeSheet.answers}
           close={() => setOpen(false)}
           open={open}

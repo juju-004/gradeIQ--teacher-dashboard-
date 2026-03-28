@@ -3,7 +3,6 @@ import { connectDB } from "@/server/db";
 import { getSession } from "@/server/actions";
 import Assessment from "@/server/models/Assessment";
 import StudentAssessmentResult from "@/server/models/StudentAssessmentResult";
-import { gradeAnswers } from "@/lib/grading";
 import mongoose from "mongoose";
 import "@/server/models/Student";
 
@@ -18,14 +17,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const assessmentId = searchParams.get("assessmentId");
 
-    if (!assessmentId) {
-      return NextResponse.json(
-        { message: "Invalid assessment ID" },
-        { status: 400 },
-      );
-    }
-    // Validate ObjectId
-    if (!mongoose.Types.ObjectId.isValid(assessmentId)) {
+    if (!assessmentId || !mongoose.Types.ObjectId.isValid(assessmentId)) {
       return NextResponse.json(
         { message: "Invalid assessment ID" },
         { status: 400 },
@@ -34,7 +26,7 @@ export async function GET(req: NextRequest) {
 
     // Fetch assessment info
     const assessment = await Assessment.findById(assessmentId)
-      .select("name answerKey")
+      .select("name rubric type")
       .lean();
 
     if (!assessment) {
@@ -48,15 +40,14 @@ export async function GET(req: NextRequest) {
     const results = await StudentAssessmentResult.find({
       assessmentId,
     })
-      .select("studentId score percentage answers")
+      .select("studentId answers")
       .populate("studentId", "name")
       .lean();
 
+    console.log({ ...assessment, results });
+
     // Merge everything
-    return NextResponse.json({
-      ...assessment,
-      results,
-    });
+    return NextResponse.json({ ...assessment, results });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
@@ -77,42 +68,39 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
 
     const schoolId = session.schoolId;
-    const { name, classId, subjectId, answerKey, students } = body;
+    const { name, classId, subjectId, rubric, results, type } = body;
 
     // ---------- VALIDATION ----------
-    if (!schoolId || !name || !classId || !subjectId || !answerKey) {
+    if (!schoolId || !name || !classId || !subjectId) {
       throw new Error("Missing assessment fields");
     }
 
     // ---------- CREATE ASSESSMENT ----------
     const assessment = await Assessment.create({
-      schoolId,
       name,
+      schoolId,
       classId,
       subjectId,
-      answerKey,
+      rubric,
+      type,
     });
 
     // ---------- CREATE STUDENT RESULTS ----------
-    if (Array.isArray(students) && students.length > 0) {
-      const results = students.map((student) => {
-        const { score, percentage } = gradeAnswers(answerKey, student.answers);
-
+    if (Array.isArray(results) && results.length > 0) {
+      const mergedResults = results.map((result) => {
         return {
           assessmentId: assessment._id,
-          studentId: student.id,
-          answers: student.answers,
-          score,
-          percentage,
+          studentId: result.id,
+          answers: result?.answers ?? [],
         };
       });
 
-      await StudentAssessmentResult.insertMany(results);
+      await StudentAssessmentResult.insertMany(mergedResults);
     }
 
     return NextResponse.json(
       {
-        message: "Assessment and results saved successfully",
+        message: "Assessment saved!!",
         assessmentId: assessment._id,
       },
       { status: 201 },

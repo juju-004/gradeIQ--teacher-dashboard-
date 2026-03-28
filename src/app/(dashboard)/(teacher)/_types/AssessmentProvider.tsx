@@ -8,7 +8,6 @@ import {
   ReactNode,
   Dispatch,
   SetStateAction,
-  useEffect,
   useContext,
 } from "react";
 
@@ -47,6 +46,9 @@ type AssessmentContextType = {
 
   studentOMRMap: Record<string, StudentOMRState>;
   setStudentOMRMap: Dispatch<SetStateAction<Record<string, StudentOMRState>>>;
+
+  results: Record<string, any[]>;
+  setResults: Dispatch<SetStateAction<Record<string, any[]>>>;
 };
 
 const AssessmentContext = createContext<AssessmentContextType | null>(null);
@@ -74,9 +76,7 @@ export function AssessmentProvider({ children }: { children: ReactNode }) {
   const [studentOMRMap, setStudentOMRMap] = useState<
     Record<string, StudentOMRState>
   >({});
-  const [mainResults, setMainResults] = useState<
-    Record<string, StudentOMRState>
-  >({});
+  const [results, setResults] = useState<Record<string, any[]>>({});
 
   return (
     <AssessmentContext.Provider
@@ -104,6 +104,9 @@ export function AssessmentProvider({ children }: { children: ReactNode }) {
 
         studentOMRMap,
         setStudentOMRMap,
+
+        results,
+        setResults,
       }}
     >
       {children}

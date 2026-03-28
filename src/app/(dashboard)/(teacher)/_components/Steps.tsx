@@ -9,21 +9,28 @@ import { toast } from "sonner";
 import { useWorkspace } from "@/context/Workspace";
 import { loadingService } from "@/services/loading";
 import axios from "axios";
+import { studentAnswers } from "@/app/(dashboard)/(teacher)/_types/assessments.types";
+import { filterError } from "@/server/lib";
+import { useRouter } from "next/navigation";
 
 export type Step = {
   title: string;
   component: ReactNode;
 };
 
-type StepsProps = {
-  steps: Step[];
-  grade: () => void;
-};
-
-export default function Steps({ steps, grade }: StepsProps) {
+export default function Steps({ steps }: { steps: Step[] }) {
   const [currentStep, setCurrentStep] = useState(0);
-  const { assessmentName, assessmentType, textQuestions } = useAssessment();
+  const {
+    assessmentName,
+    assessmentType,
+    textQuestions,
+    omrScheme,
+    students,
+    studentOMRMap,
+    results,
+  } = useAssessment();
   const { workspace } = useWorkspace();
+  const { push } = useRouter();
 
   const progress = ((currentStep + 1) / steps.length) * 100;
 
@@ -50,38 +57,57 @@ export default function Steps({ steps, grade }: StepsProps) {
     return true;
   };
 
-  //  const saveAssessment = async () => {
-  //     if (!workspace) {
-  //       toast.error("No workspace");
-  //       return;
-  //     }
-  //     loadingService.show();
+  const saveAssessment = async () => {
+    if (!workspace) {
+      toast.error("No workspace");
+      return;
+    }
+    if (!students) return;
+    loadingService.show();
 
-  //     try {
-  //       const { data } = await axios.post("/api/teacher/assessments", {
-  //         name: assessmentName,
-  //         classId: workspace?.classId,
-  //         subjectId: workspace?.subjectId,
-  //         answerKey: markingScheme,
-  //         students: simplifiedOMR,
-  //       });
+    const mergedResults = students.map((studId) => {
+      const answers = studentOMRMap[studId.id]?.answers || null;
+      const grading = results[studId.id] || [];
 
-  //       console.log(data);
+      if (!answers) return { id: studId.id, answers: null };
 
-  //       loadingService.hide();
-  //       toast.success(data.message);
-  //       push(`/assessment/${data.assessmentId}`);
-  //     } catch (error) {
-  //       loadingService.hide();
-  //       toast.error(filterError(error));
-  //     }
-  //   };
+      const studAnswers =
+        assessmentType === "text"
+          ? answers.map((ans, i) => ({
+              answer: (ans as studentAnswers).answers.join(","),
+              score: grading[i]?.score ?? 0, // default 0 if not graded
+            }))
+          : answers;
+
+      return { id: studId.id, answers: studAnswers };
+    });
+
+    try {
+      const { data } = await axios.post("/api/teacher/assessments", {
+        name: assessmentName,
+        classId: workspace?.classId,
+        subjectId: workspace?.subjectId,
+        type: assessmentType,
+        rubric: assessmentType === "omr" ? omrScheme : textQuestions,
+        results: mergedResults,
+      });
+
+      loadingService.hide();
+      toast.success(data.message);
+      push(`/assessment/${data.assessmentId}`);
+    } catch (error) {
+      loadingService.hide();
+      toast.error(filterError(error));
+    }
+  };
 
   const next = () => {
     const isValid = checkValidity(currentStep);
 
     if (!isValid) return;
-    currentStep === steps.length - 1 ? grade() : setCurrentStep((s) => s + 1);
+    currentStep === steps.length - 1
+      ? saveAssessment()
+      : setCurrentStep((s) => s + 1);
   };
   return (
     <div className="sm:p-6 p-3 space-y-10 w-full overflow-hidden">

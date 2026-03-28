@@ -3,13 +3,14 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
+import { Answer } from "@/app/(dashboard)/(teacher)/_types/assessments.types";
 
 export type Results = {
-  _id: string;
-  studentId: { name: string };
+  name: string;
   score: string;
-  answers: string[];
+  totalScore: string;
   percentage: string;
+  answers: string[] | Answer[];
 };
 
 type ColumnActions = {
@@ -17,11 +18,11 @@ type ColumnActions = {
 };
 
 export const resultsColumns = (
-  actions: ColumnActions
+  actions: ColumnActions,
 ): ColumnDef<Results>[] => [
   // Student name
   {
-    accessorFn: (row) => row.studentId.name,
+    accessorFn: (row) => row.name,
     id: "name",
     header: ({ column }) => (
       <Button
@@ -33,7 +34,7 @@ export const resultsColumns = (
       </Button>
     ),
     cell: ({ row }) => (
-      <span className="font-medium ml-3">{row.original.studentId.name}</span>
+      <span className="font-medium ml-3">{row.original.name}</span>
     ),
   },
 
@@ -51,7 +52,7 @@ export const resultsColumns = (
     cell: ({ row }) => (
       <span className="font-medium ml-3">
         {row.original.score}{" "}
-        <span className="opacity-60">/ {row.original.answers.length}</span>
+        <span className="opacity-60">/ {row.original.totalScore}</span>
       </span>
     ),
   },
@@ -61,16 +62,6 @@ export const resultsColumns = (
     cell: ({ row }) => (
       <span className="text-center text-c1 font-bold">
         {row.original.percentage}%
-      </span>
-    ),
-  },
-  {
-    accessorKey: "attempted",
-    header: "Attempted",
-    cell: ({ row }) => (
-      <span className="text-center font-medium">
-        {row.original.answers.filter((answer) => answer !== "-").length}{" "}
-        <span className="opacity-60">/ {row.original.answers.length}</span>
       </span>
     ),
   },
