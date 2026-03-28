@@ -106,24 +106,21 @@ export default function UploadPage() {
     }));
 
     try {
-      // const { data } = await axios.post("/api/ocr", formData, {
-      //   headers: {
-      //     "Content-Type": "multipart/form-data",
+      const { data } = await axios.post("/api/ocr", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      // const data = [
+      //   {
+      //     questionNumber: 1,
+      //     answers: ["Plants use sunlight to produce chlorophyll"],
       //   },
-      // });
-
-      // console.log(data);
-
-      const data = [
-        {
-          questionNumber: 1,
-          answers: ["Plants use sunlight to produce chlorophyll"],
-        },
-        {
-          questionNumber: 2,
-          answers: ["Rome", "London", "Las Vegas"],
-        },
-      ];
+      //   {
+      //     questionNumber: 2,
+      //     answers: ["Rome", "London", "Las Vegas"],
+      //   },
+      // ];
 
       setStudentOMRMap((prev) => ({
         ...prev,
