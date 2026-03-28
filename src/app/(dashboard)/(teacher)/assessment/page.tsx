@@ -10,7 +10,6 @@ export default function AssessmentSetup() {
   return (
     <AssessmentProvider>
       <Steps
-        grade={() => {}}
         steps={[
           {
             title: "Assessment Info",

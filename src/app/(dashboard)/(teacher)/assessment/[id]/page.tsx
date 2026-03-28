@@ -44,8 +44,6 @@ export default function ResultsTable() {
     fetcher,
   );
 
-  console.log(data);
-
   const tableData = useMemo(() => {
     if (!data) return [];
 
