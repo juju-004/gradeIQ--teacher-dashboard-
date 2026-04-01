@@ -38,6 +38,8 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
           break;
         }
       }
+
+      if (!workspace) setWorkspace(data[0]);
     });
   }, []);
 

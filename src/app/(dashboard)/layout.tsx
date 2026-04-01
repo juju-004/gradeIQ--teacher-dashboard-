@@ -34,7 +34,9 @@ export default async function RootLayout({
           <ASidebar />
           <main className="flex flex-1 flex-col overflow-hidden">
             <Navbar />
-            <div className="flex-1 overflow-y-auto">{children}</div>
+            <div className="flex-1 px-2 sm:px-0 overflow-y-auto">
+              {children}
+            </div>
           </main>
         </SidebarProvider>
       </RoleProviders>

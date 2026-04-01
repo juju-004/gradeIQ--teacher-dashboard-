@@ -141,7 +141,7 @@ const ASidebar = () => {
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   ))}
-                  <SidebarMenuItem key={"settings"}>
+                  {/* <SidebarMenuItem key={"settings"}>
                     <SidebarMenuButton
                       asChild
                       onClick={() => {
@@ -162,7 +162,7 @@ const ASidebar = () => {
                         <span className="text-sm">Settings</span>
                       </Link>
                     </SidebarMenuButton>
-                  </SidebarMenuItem>
+                  </SidebarMenuItem> */}
                 </div>
               ))}
 
