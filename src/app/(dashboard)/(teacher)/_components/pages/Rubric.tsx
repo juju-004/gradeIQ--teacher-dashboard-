@@ -162,10 +162,10 @@ export default function Rubric() {
         ) : rubric["omr"].value.length ? (
           <Fadein key="answer-key" className="overflow-hidden mt-4">
             <AnswerKeySelect
+              studentId="56trffg"
               answers={rubric["omr"].value}
               setAnswers={rubric["omr"].onChange}
               optionCount={parseInt(optionCount)}
-              numberOfQuestions={questionCount}
             />
           </Fadein>
         ) : (
