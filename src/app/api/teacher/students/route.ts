@@ -19,7 +19,7 @@ export async function GET(req: Request) {
     if (!classId || !subjectId) {
       return NextResponse.json(
         { error: "classId and subjectId are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -46,6 +46,7 @@ export async function GET(req: Request) {
         $lookup: {
           from: "studentassessmentresults",
           let: { studentId: "$_id" },
+
           pipeline: [
             {
               $match: {
@@ -73,11 +74,36 @@ export async function GET(req: Request) {
                 "assessment.schoolId": session.schoolId,
               },
             },
+
+            // ---------- compute percentage ----------
+            {
+              $addFields: {
+                percentage: {
+                  $cond: [
+                    { $eq: ["$assessment.totalScore", 0] },
+                    0,
+                    {
+                      $multiply: [
+                        {
+                          $divide: [
+                            { $toDouble: "$score" },
+                            { $toDouble: "$assessment.totalScore" },
+                          ],
+                        },
+                        100,
+                      ],
+                    },
+                  ],
+                },
+              },
+            },
           ],
+
           as: "results",
         },
       },
 
+      // ---------- compute student averages ----------
       {
         $addFields: {
           averageScore: {
@@ -87,6 +113,7 @@ export async function GET(req: Request) {
               null,
             ],
           },
+
           assessmentCount: { $size: "$results" },
         },
       },
@@ -95,7 +122,15 @@ export async function GET(req: Request) {
         $project: {
           name: 1,
           sex: 1,
-          averageScore: { $round: ["$averageScore", 1] },
+
+          averageScore: {
+            $cond: [
+              { $ne: ["$averageScore", null] },
+              { $round: ["$averageScore", 1] },
+              null,
+            ],
+          },
+
           assessmentCount: 1,
         },
       },
@@ -105,10 +140,9 @@ export async function GET(req: Request) {
 
     return NextResponse.json(students);
   } catch (error) {
-    // console.error("GET /my-students error:", error);
     return NextResponse.json(
       { error: "Failed to fetch students" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

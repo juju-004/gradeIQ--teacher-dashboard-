@@ -20,24 +20,28 @@ import { AssessmentLibrarySkeleton } from "@/app/(dashboard)/(teacher)/library/l
 import Link from "next/link";
 import { LibraryEmpty } from "@/app/(dashboard)/(teacher)/library/library-empty";
 import { DeleteAssessmentPopover } from "@/app/(dashboard)/(teacher)/library/delete-assessment";
+import { AssessmentType } from "@/app/(dashboard)/(teacher)/_types/assessments.types";
 
 export type Assessment = {
   assessmentId: string;
   name: string;
   studentsCount: number;
   averagePercentage: number;
+  type: AssessmentType;
   takenAt: string;
 };
 
 export default function TeacherAssessmentLibrary() {
   const { workspace } = useWorkspace();
 
-  const { data, isLoading, mutate } = useSWR<Assessment[]>(
+  const { data, mutate } = useSWR<Assessment[]>(
     workspace?.classId && workspace.subjectId
       ? `/api/teacher/library?classId=${workspace?.classId}&subjectId=${workspace.subjectId}`
       : null,
     fetcher,
   );
+
+  console.log(data);
 
   return (
     <div className="sm:p-6 p-2 space-y-6">
@@ -47,64 +51,67 @@ export default function TeacherAssessmentLibrary() {
       <Separator />
       {/* Assessment List */}
       <div className="grid gap-4">
-        {isLoading ? (
-          <AssessmentLibrarySkeleton />
-        ) : (data ?? []).length === 0 ? (
-          <LibraryEmpty />
-        ) : (
-          (data ?? []).map((assessment) => (
-            <Card
-              key={assessment.assessmentId}
-              className="hover:border-c1/50 transition"
-            >
-              <CardHeader className="flex flex-row items-start justify-between">
-                <div className="space-y-1">
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <FileText className="h-4 w-4 text-c1" />
-                    {assessment.name}
-                  </CardTitle>
+        {Array.isArray(data) ? (
+          data.length ? (
+            data.map((assessment) => (
+              <Card
+                key={assessment.assessmentId}
+                className="hover:border-c1/50 transition"
+              >
+                <CardHeader className="flex flex-row items-start justify-between">
+                  <div className="space-y-1">
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <FileText className="h-4 w-4 text-c1" />
+                      {assessment.name}{" "}
+                      <span className="opacity-50">{` [${assessment.type}]`}</span>
+                    </CardTitle>
 
+                    <div className="flex gap-2">
+                      <Badge variant="secondary">
+                        Avg: {assessment.averagePercentage}%
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <div className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Calendar className="h-4 w-4" />
+                    {new Date(assessment.takenAt).toLocaleDateString()}
+                  </div>
+                </CardHeader>
+
+                <CardContent className="flex items-center justify-between">
+                  {/* Meta */}
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Users className="h-4 w-4" />
+                      {assessment.studentsCount} students
+                    </div>
+                  </div>
+
+                  {/* Actions */}
                   <div className="flex gap-2">
-                    <Badge variant="secondary">
-                      Avg: {assessment.averagePercentage}%
-                    </Badge>
+                    <Link href={`/assessment/${assessment.assessmentId}`}>
+                      <Button
+                        size="sm"
+                        className="bg-c1 text-white hover:bg-c1/90"
+                      >
+                        <Eye className="h-4 w-4 mr-1" />
+                        View
+                      </Button>
+                    </Link>
+                    <DeleteAssessmentPopover
+                      assessmentId={assessment.assessmentId}
+                      refresh={mutate}
+                    />
                   </div>
-                </div>
-
-                <div className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Calendar className="h-4 w-4" />
-                  {new Date(assessment.takenAt).toLocaleDateString()}
-                </div>
-              </CardHeader>
-
-              <CardContent className="flex items-center justify-between">
-                {/* Meta */}
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Users className="h-4 w-4" />
-                    {assessment.studentsCount} students
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex gap-2">
-                  <Link href={`/assessment/${assessment.assessmentId}`}>
-                    <Button
-                      size="sm"
-                      className="bg-c1 text-white hover:bg-c1/90"
-                    >
-                      <Eye className="h-4 w-4 mr-1" />
-                      View
-                    </Button>
-                  </Link>
-                  <DeleteAssessmentPopover
-                    assessmentId={assessment.assessmentId}
-                    refresh={mutate}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          ))
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <LibraryEmpty />
+          )
+        ) : (
+          <AssessmentLibrarySkeleton />
         )}
       </div>
     </div>

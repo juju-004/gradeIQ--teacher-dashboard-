@@ -113,7 +113,7 @@ export default function Steps({ steps }: { steps: Step[] }) {
     <div className="sm:p-6 p-3 space-y-10 w-full overflow-hidden">
       <div className="flex items-start md:items-center md:gap-4 gap-1 md:flex-row flex-col justify-between">
         <h1 className="text-2xl font-bold mb-6">New Assessment</h1>
-        <div className="space-y-2 max-w-sm flex-1">
+        <div className="space-y-2 max-w-64 flex-1">
           <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
             <motion.div
               className="h-full bg-c1 rounded-full"

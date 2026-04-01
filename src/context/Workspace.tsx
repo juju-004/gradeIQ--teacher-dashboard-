@@ -15,7 +15,7 @@ interface WorkspaceContextType {
 }
 
 const WorkspaceContext = createContext<WorkspaceContextType | undefined>(
-  undefined
+  undefined,
 );
 
 export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
@@ -26,7 +26,18 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     axios.get("/api/teacher/assignments").then(({ data }) => {
       setWorkspaces(data);
-      if (data.length > 0) setWorkspace(data[0]);
+      if (data.length === 0) return;
+
+      const current = localStorage.getItem("workspace");
+
+      if (!current) setWorkspace(data[0]);
+
+      for (let i = 0; i < data.length; i++) {
+        if (data[i]?.value === current) {
+          setWorkspace(data[i]);
+          break;
+        }
+      }
     });
   }, []);
 

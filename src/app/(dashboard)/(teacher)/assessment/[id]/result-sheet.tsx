@@ -29,6 +29,7 @@ import {
   Answer,
   AssessmentType,
 } from "@/app/(dashboard)/(teacher)/_types/assessments.types";
+import { cn } from "@/lib/utils";
 
 export interface ResultSheetProps {
   open: boolean;
@@ -61,16 +62,7 @@ export default function ResultSheet({
   answers,
 }: ResultSheetProps) {
   const [view, setView] = useState<"detailed" | "compact">("compact");
-
-  /*
-    TYPE GUARDS
-  */
-
   const isOMR = type === "omr";
-
-  /*
-    OMR CALCULATIONS
-  */
 
   const omrStats = useMemo(() => {
     if (!isOMR) return null;
@@ -94,35 +86,12 @@ export default function ResultSheet({
     };
   }, [isOMR, rubric, answers]);
 
-  /*
-    TEXT CALCULATIONS
-  */
-
-  const textBreakdown = useMemo(() => {
-    if (isOMR) return null;
-
-    const questions = rubric as Question[];
-    const studentAnswers = answers as Answer[];
-
-    return questions.map((q) => {
-      const studentAnswer = studentAnswers.find((a) => a.text?.trim() !== "");
-
-      const totalScore = q.answers.reduce((sum, a) => sum + a.score, 0);
-
-      return {
-        questionNumber: q.questionNumber,
-        rubricAnswers: q.answers,
-        totalScore,
-      };
-    });
-  }, [isOMR, rubric, answers]);
-
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right">
         <ScrollArea className="h-screen">
           <SheetHeader>
-            <SheetTitle>
+            <SheetTitle className="pt-3">
               {name}
 
               <div className="flex gap-2 mt-3 flex-wrap">
@@ -130,46 +99,49 @@ export default function ResultSheet({
                   {score}/{totalScore}
                 </Badge>
 
-                <Badge variant="secondary">{percentage}%</Badge>
+                <Badge variant="secondary">
+                  <span className="opacity-50 font-light">Percentage:</span>{" "}
+                  {percentage}%
+                </Badge>
 
                 {isOMR && (
-                  <Badge variant="outline">
-                    {omrStats?.unattempted} Unattempted
+                  <Badge variant="secondary">
+                    <span className="opacity-50 font-light">Unattempted:</span>{" "}
+                    {omrStats?.unattempted}
                   </Badge>
                 )}
               </div>
+              {isOMR && (
+                <div className="flex items-center gap-2 mt-3">
+                  <button
+                    onClick={() => setView("detailed")}
+                    className={`p-2 rounded-md border transition ${
+                      view === "detailed"
+                        ? "bg-c1 text-white border-c1"
+                        : "hover:bg-muted"
+                    }`}
+                  >
+                    <LayoutList className="w-4 h-4" />
+                  </button>
 
-              {/* VIEW TOGGLE */}
-
-              <div className="flex items-center gap-2 mt-3">
-                <button
-                  onClick={() => setView("detailed")}
-                  className={`p-2 rounded-md border transition ${
-                    view === "detailed"
-                      ? "bg-c1 text-white border-c1"
-                      : "hover:bg-muted"
-                  }`}
-                >
-                  <LayoutList className="w-4 h-4" />
-                </button>
-
-                <button
-                  onClick={() => setView("compact")}
-                  className={`p-2 rounded-md border transition ${
-                    view === "compact"
-                      ? "bg-c1 text-white border-c1"
-                      : "hover:bg-muted"
-                  }`}
-                >
-                  <Grid2X2 className="w-4 h-4" />
-                </button>
-              </div>
+                  <button
+                    onClick={() => setView("compact")}
+                    className={`p-2 rounded-md border transition ${
+                      view === "compact"
+                        ? "bg-c1 text-white border-c1"
+                        : "hover:bg-muted"
+                    }`}
+                  >
+                    <Grid2X2 className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
             </SheetTitle>
 
             <Separator className="my-4" />
 
             <SheetDescription asChild>
-              <div className="px-6 py-2">
+              <div className=" py-2">
                 {/* ================= OMR ================= */}
 
                 {isOMR &&
@@ -185,35 +157,35 @@ export default function ResultSheet({
                         return (
                           <div
                             key={idx}
-                            className="flex items-center justify-between border rounded-xl p-3"
+                            className="flex items-center justify-between border rounded-xl px-3"
                           >
-                            <div className="space-y-1">
-                              <p className="font-medium">Question {idx + 1}</p>
+                            <div className="space-y-1 flex justify-between gap-3">
+                              <p className="font-medium">Q{idx + 1}</p>
 
                               <div className="text-sm flex gap-4">
                                 <span>
-                                  <span className="text-muted-foreground">
-                                    Correct:
-                                  </span>{" "}
-                                  <strong>{correctAnswer}</strong>
+                                  <span className="">Correct:</span>{" "}
+                                  <strong className="text-c1">
+                                    {correctAnswer}
+                                  </strong>
                                 </span>
 
                                 <span>
-                                  <span className="text-muted-foreground">
-                                    Student:
-                                  </span>{" "}
-                                  <strong>{studentAnswer}</strong>
+                                  <span className="">Student:</span>{" "}
+                                  <strong
+                                    className={cn(
+                                      studentAnswer === "-"
+                                        ? "text-muted-foreground"
+                                        : correct
+                                          ? "text-green-600"
+                                          : "text-red-600",
+                                    )}
+                                  >
+                                    {studentAnswer}
+                                  </strong>
                                 </span>
                               </div>
                             </div>
-
-                            {studentAnswer === "-" ? (
-                              <MinusCircle className="text-muted-foreground" />
-                            ) : correct ? (
-                              <CheckCircle2 className="text-green-600" />
-                            ) : (
-                              <XCircle className="text-red-600" />
-                            )}
                           </div>
                         );
                       })}
@@ -284,17 +256,29 @@ export default function ResultSheet({
                           </div>
 
                           <div className="text-sm">
-                            <p className="text-muted-foreground mb-1">
-                              Student answer
-                            </p>
-
-                            <div className="bg-muted p-2 rounded-md">
-                              {studentAnswer?.text || "-"}
+                            <div
+                              className={cn(
+                                "bg-muted p-2 rounded-md",
+                                question.type === "list" &&
+                                  "flex flex-col gap-1 list-disc",
+                              )}
+                            >
+                              {question.type === "list"
+                                ? studentAnswer?.text
+                                    .split(",")
+                                    .map((txt, key) => (
+                                      <span key={key}>{txt}</span>
+                                    ))
+                                : studentAnswer?.text || "-"}
                             </div>
                           </div>
 
                           <div className="text-xs text-muted-foreground">
-                            Expected keywords / answers:
+                            Expected{" "}
+                            {question.type === "keyword"
+                              ? "keywords"
+                              : "answers"}
+                            :
                             <div className="flex flex-wrap gap-1 mt-1">
                               {question.answers.map((ans, i) => (
                                 <Badge key={i} variant="outline">

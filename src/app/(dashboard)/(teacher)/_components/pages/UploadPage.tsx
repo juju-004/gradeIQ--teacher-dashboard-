@@ -68,19 +68,18 @@ export default function UploadPage() {
   } = useAssessment();
 
   const [activeStudentId, setActiveStudentId] = useState<string | null>(null);
-  const activeStud = useMemo(
-    () =>
-      activeStudentId && studentOMRMap[activeStudentId]
-        ? studentOMRMap[activeStudentId]
-        : {
-            file: null,
-            answers:
-              assessmentType === "omr"
-                ? Array(questionCount).fill("-")
-                : undefined,
-          },
-    [studentOMRMap, activeStudentId],
-  );
+  const activeStud = useMemo(() => {
+    return activeStudentId && studentOMRMap[activeStudentId]
+      ? studentOMRMap[activeStudentId]
+      : {
+          file: null,
+          answers:
+            assessmentType === "omr"
+              ? Array(questionCount).fill("-")
+              : undefined,
+        };
+  }, [studentOMRMap, activeStudentId]);
+
   const rubricMeta = textQuestions.map((q) => ({
     questionNumber: q.questionNumber,
     type: q.type,
@@ -181,6 +180,27 @@ export default function UploadPage() {
     getStudents();
   }, []);
 
+  useEffect(() => {
+    if (!activeStudentId || assessmentType !== "omr") return;
+
+    setStudentOMRMap((prev) => {
+      const existing =
+        prev[activeStudentId]?.answers ?? Array(questionCount).fill("-");
+
+      if (existing.length === questionCount) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        [activeStudentId]: {
+          ...prev[activeStudentId],
+          answers: Array(questionCount).fill("-"),
+        },
+      };
+    });
+  }, [questionCount, activeStudentId]);
+
   return (
     <div className="space-y-6 flex flex-col">
       {/* Student switcher */}
@@ -197,10 +217,10 @@ export default function UploadPage() {
             <Display assessmentType="omr" activeStud={activeStud}>
               <div className="flex flex-col gap-5">
                 <AnswerKeySelect
-                  setAnswers={(newAnswers) =>
+                  setAnswers={(newAnswers, studentId) =>
                     setStudentOMRMap((prev) => {
                       const prevAnswers =
-                        prev[activeStudentId]?.answers ??
+                        prev[studentId]?.answers ??
                         Array(questionCount).fill("-");
                       const nextAnswers =
                         typeof newAnswers === "function"
@@ -209,17 +229,17 @@ export default function UploadPage() {
 
                       return {
                         ...prev,
-                        [activeStudentId]: {
-                          ...prev[activeStudentId]!,
+                        [studentId]: {
+                          ...prev[studentId],
                           answers: nextAnswers,
                         },
                       };
                     })
                   }
+                  studentId={activeStudentId}
                   answers={activeStud.answers as AnswerOption[]}
                   gradingRubric={omrScheme}
                   optionCount={parseInt(optionCount)}
-                  numberOfQuestions={questionCount}
                 />
                 <Card className="border-2 border-primary">
                   <CardContent className="px-6 flex justify-between items-center">

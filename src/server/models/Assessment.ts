@@ -5,6 +5,7 @@ const AssessmentSchema = new Schema(
   {
     name: { type: String, required: true, trim: true },
     type: { type: String, required: true },
+    totalScore: { type: Number, required: true },
     schoolId: {
       type: String,
       required: true,

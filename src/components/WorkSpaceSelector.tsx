@@ -8,20 +8,25 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useWorkspace } from "@/context/Workspace";
+import { loadingService } from "@/services/loading";
 
 export function WorkspaceSelector() {
   const { workspace, setWorkspace, workspaces } = useWorkspace();
 
+  const refreshPage = (value: string) => {
+    const ws = workspaces.find((w) => w.value === value);
+    if (ws) {
+      setWorkspace(ws);
+      localStorage.setItem("workspace", value);
+      loadingService.show();
+
+      window.location.reload();
+    }
+  };
   return (
     <>
       {workspace ? (
-        <Select
-          value={workspace?.value ?? ""}
-          onValueChange={(val) => {
-            const ws = workspaces.find((w) => w.value === val);
-            if (ws) setWorkspace(ws);
-          }}
-        >
+        <Select value={workspace?.value ?? ""} onValueChange={refreshPage}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select Workspace" />
           </SelectTrigger>

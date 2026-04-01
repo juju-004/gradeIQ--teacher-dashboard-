@@ -5,6 +5,11 @@ import Assessment from "@/server/models/Assessment";
 import StudentAssessmentResult from "@/server/models/StudentAssessmentResult";
 import mongoose from "mongoose";
 import "@/server/models/Student";
+import { Question } from "@/app/(dashboard)/(teacher)/_types/assessments.types";
+import {
+  gradeOMR,
+  gradeText,
+} from "@/app/(dashboard)/(teacher)/_grading/gradeOMR";
 
 export async function GET(req: NextRequest) {
   try {
@@ -26,7 +31,7 @@ export async function GET(req: NextRequest) {
 
     // Fetch assessment info
     const assessment = await Assessment.findById(assessmentId)
-      .select("name rubric type")
+      .select("name rubric type totalScore")
       .lean();
 
     if (!assessment) {
@@ -40,14 +45,24 @@ export async function GET(req: NextRequest) {
     const results = await StudentAssessmentResult.find({
       assessmentId,
     })
-      .select("studentId answers")
+      .select("studentId answers score")
       .populate("studentId", "name")
       .lean();
 
-    console.log({ ...assessment, results });
+    const demi = results.map(({ answers, studentId, score }) => ({
+      studentId,
+      score,
+      answers:
+        (assessment as any)?.type === "omr"
+          ? answers
+          : (answers as any[]).map(({ answer, score }) => ({
+              text: answer,
+              score,
+            })),
+    }));
 
     // Merge everything
-    return NextResponse.json({ ...assessment, results });
+    return NextResponse.json({ ...assessment, results: demi });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
@@ -63,6 +78,7 @@ export async function POST(req: NextRequest) {
     if (!session?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
     await connectDB();
 
     const body = await req.json();
@@ -71,8 +87,25 @@ export async function POST(req: NextRequest) {
     const { name, classId, subjectId, rubric, results, type } = body;
 
     // ---------- VALIDATION ----------
-    if (!schoolId || !name || !classId || !subjectId) {
+    if (!schoolId || !name || !classId || !subjectId || !type) {
       throw new Error("Missing assessment fields");
+    }
+
+    if (!["omr", "text"].includes(type)) {
+      throw new Error("Invalid assessment type");
+    }
+
+    // ---------- CALCULATE TOTAL SCORE ----------
+    let totalScore = 0;
+
+    if (type === "omr") {
+      totalScore = (rubric as string[]).length;
+    }
+
+    if (type === "text") {
+      totalScore = (rubric as Question[]).reduce((sum, q) => {
+        return sum + q.answers.reduce((qSum, a) => qSum + (a.score ?? 0), 0);
+      }, 0);
     }
 
     // ---------- CREATE ASSESSMENT ----------
@@ -83,19 +116,31 @@ export async function POST(req: NextRequest) {
       subjectId,
       rubric,
       type,
+      totalScore,
     });
 
     // ---------- CREATE STUDENT RESULTS ----------
     if (Array.isArray(results) && results.length > 0) {
-      const mergedResults = results.map((result) => {
+      const gradedResults = results.map((result) => {
+        let score = 0;
+        if (type === "omr") {
+          const graded = gradeOMR(rubric as string[], result?.answers ?? []);
+          score = graded;
+        }
+
+        if (type === "text") {
+          const graded = gradeText(result?.answers ?? []);
+          score = graded;
+        }
         return {
           assessmentId: assessment._id,
           studentId: result.id,
           answers: result?.answers ?? [],
+          score,
         };
       });
 
-      await StudentAssessmentResult.insertMany(mergedResults);
+      await StudentAssessmentResult.insertMany(gradedResults);
     }
 
     return NextResponse.json(
@@ -107,6 +152,7 @@ export async function POST(req: NextRequest) {
     );
   } catch (error) {
     console.error(error);
+
     return NextResponse.json(
       { error: "Failed to save assessment" },
       { status: 500 },
@@ -133,9 +179,6 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    console.log(assessmentId);
-    console.log("yes 1");
-
     if (!mongoose.Types.ObjectId.isValid(assessmentId)) {
       return NextResponse.json(
         { message: "Invalid assessment ID" },
@@ -143,14 +186,8 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    console.log("yes 2");
-    // Delete student results first (important)
     await StudentAssessmentResult.deleteMany({ assessmentId });
-    console.log("yes 3");
-
-    // Delete assessment
     await Assessment.findByIdAndDelete(assessmentId);
-    console.log("yes 4");
 
     return NextResponse.json({ success: true });
   } catch (error) {

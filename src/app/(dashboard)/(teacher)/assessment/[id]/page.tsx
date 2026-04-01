@@ -16,21 +16,18 @@ import {
 } from "@/app/(dashboard)/(teacher)/_types/assessments.types";
 import { Skeleton } from "@/components/ui/skeleton";
 import ResultSheet from "@/app/(dashboard)/(teacher)/assessment/[id]/result-sheet";
-import {
-  gradeOMR,
-  gradeText,
-} from "@/app/(dashboard)/(teacher)/_grading/gradeOMR";
 
 export type Result = {
-  _id: string;
   studentId: { name: string };
   answers: string[] | Answer[];
+  score: number;
 };
 
 export interface AssessmentResultsResponse {
   _id: string;
   name: string;
   type: "omr" | "text";
+  totalScore: number;
   rubric: AnswerOption[] | Question[];
   results: Result[];
 }
@@ -46,35 +43,15 @@ export default function ResultsTable() {
 
   const tableData = useMemo(() => {
     if (!data) return [];
-
-    // ---------- OMR ----------
-    if (data.type === "omr") {
-      const rubric = data.rubric as string[];
-
-      return data.results.map((student) => {
-        const graded = gradeOMR(rubric, student.answers as string[]);
-
-        return {
-          name: student.studentId.name,
-          score: graded.score.toString(),
-          totalScore: graded.total.toString(),
-          percentage: graded.percentage.toFixed(0),
-          answers: student.answers,
-        };
-      });
-    }
-
-    // ---------- TEXT ----------
-    const rubric = data.rubric as Question[];
+    const { totalScore } = data;
 
     return data.results.map((student) => {
-      const graded = gradeText(rubric, student.answers as Answer[]);
-
+      const score = student.score;
       return {
         name: student.studentId.name,
-        score: graded.score.toString(),
-        totalScore: graded.total.toString(),
-        percentage: graded.percentage.toFixed(0),
+        score: score.toString(),
+        totalScore: totalScore.toString(),
+        percentage: ((score / totalScore) * 100).toFixed(0),
         answers: student.answers,
       };
     });

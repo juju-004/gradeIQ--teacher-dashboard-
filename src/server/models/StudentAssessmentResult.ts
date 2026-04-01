@@ -15,7 +15,7 @@ const StudentAssessmentResultSchema = new Schema(
       required: true,
       index: true,
     },
-
+    score: { type: Number, required: true },
     answers: { type: Array, required: true },
   },
   { timestamps: true },

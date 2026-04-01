@@ -60,10 +60,32 @@ export async function GET(req: NextRequest) {
         },
       },
 
+      {
+        $addFields: {
+          percentage: {
+            $cond: [
+              { $eq: ["$assessment.totalScore", "0"] },
+              0,
+              {
+                $multiply: [
+                  {
+                    $divide: [
+                      { $toDouble: "$score" },
+                      { $toDouble: "$assessment.totalScore" },
+                    ],
+                  },
+                  100,
+                ],
+              },
+            ],
+          },
+        },
+      },
       // Group results per assessment
       {
         $group: {
           _id: "$assessment._id",
+          type: { $first: "$assessment.type" },
           name: { $first: "$assessment.name" },
           studentsCount: { $sum: 1 },
           averagePercentage: { $avg: "$percentage" },
@@ -76,6 +98,7 @@ export async function GET(req: NextRequest) {
         $project: {
           _id: 0,
           assessmentId: "$_id",
+          type: { $toString: "$type" },
           name: 1,
           studentsCount: 1,
           averagePercentage: { $round: ["$averagePercentage", 1] },
@@ -86,6 +109,8 @@ export async function GET(req: NextRequest) {
       // Most recent first
       { $sort: { takenAt: -1 } },
     ]);
+
+    console.log(library);
 
     return NextResponse.json(library);
   } catch (error) {
